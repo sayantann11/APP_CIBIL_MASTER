@@ -1,0 +1,30 @@
+<h2>Enter PAN and Personal Details</h2>
+
+{% if error %}
+<p style="color: red;">{{ error }}</p>
+{% endif %}
+
+<form method="post">
+    <label>Mobile:</label>
+    <input type="text" name="mobile" value="{{ form_data.mobile if form_data else '' }}" required><br>
+
+    <label>PAN:</label>
+    <input type="text" name="pan" value="{{ form_data.pan if form_data else '' }}" required><br>
+
+    <label>Name:</label>
+    <input type="text" name="name" value="{{ form_data.name if form_data else '' }}" required><br>
+
+    <label>Gender:</label>
+    <select name="gender" required>
+        <option value="male" {% if form_data.gender == 'male' %}selected{% endif %}>Male</option>
+        <option value="female" {% if form_data.gender == 'female' %}selected{% endif %}>Female</option>
+    </select><br>
+
+    <label>Consent:</label>
+    <input type="checkbox" name="consent" value="Y" {% if form_data.consent == 'Y' %}checked{% endif %}> I give my consent<br>
+
+    <button type="submit">Fetch CIBIL</button>
+</form>
+
+
+

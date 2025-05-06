@@ -1,0 +1,55 @@
+<h3>Loan Eligibility Results</h3>
+
+<h4>✅ Accepted Banks</h4>
+{% if accepted_banks %}
+  <ul>
+    {% for bank in accepted_banks %}
+      <li><strong>{{ bank }}</strong></li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No banks accepted.</p>
+{% endif %}
+
+<h4>❌ Rejected Banks</h4>
+{% if rejected_banks %}
+  {% for bank, reasons in rejected_banks.items() %}
+    <p><strong>{{ bank }}:</strong> {{ reasons }}</p>
+  {% endfor %}
+{% else %}
+  <p>No banks rejected.</p>
+{% endif %}
+
+<hr>
+
+{% if mother_loan %}
+  <h4>✅ Mother Loan Found</h4>
+  <p><strong>Account Number:</strong> {{ mother_loan.get("accountNumber", "N/A") }}</p>
+  <p><strong>Bank:</strong> {{ mother_loan.get("memberShortName", "Unknown") }}</p>
+  <p><strong>Loan Opened On:</strong> {{ mother_loan.get("dateOpened", "N/A") }}</p>
+
+  <p><strong>Bounce Summary:</strong></p>
+  <ul>
+    {% for label, count in bounce_summary.items() %}
+      <li>{{ label }}: {{ count }} DPDs</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>❌ No mother loan found.</p>
+{% endif %}
+
+
+
+
+
+{% if rc_data and cibil_data %}
+  <form action="{{ url_for('download_data') }}" method="post">
+    <button type="submit">Download RC + CIBIL Data (JSON)</button>
+  </form>
+{% endif %}
+<!-- Add the home page redirect button -->
+
+<h3>Click to Check another Entry </h3>
+<form action="{{ url_for('index') }}" method="get">
+  <button type="submit">Go to Home Page</button>
+</form>
