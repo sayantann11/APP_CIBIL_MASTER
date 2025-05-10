@@ -22,7 +22,7 @@ BANK_RULES = {
             (0, 0, "PASS"), (1, 5, "PASS"), (6, float('inf'), "PASS")
         ],
         "dpd_1_above": [
-            (0, 0, "PASS"), (1, 1, "PASS"), (2, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"), (6, float('inf'), "REJECT")
         ],
         "dpd_31_44": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, float('inf'), "REJECT")
@@ -1245,7 +1245,7 @@ def check_condition(value, rules):
         if min_val <= value <= max_val:
             return result
     return "Invalid"
-def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, dpd_1_44,dpd_1_above, dpd_31_44, dpd_45_above,
+def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, dpd_1_44,dpd_1_above, dpd_31_44, dpd_45_above,total_loan_amount,
                               car_age, car_owner_age, bounces_0_3, bounces_0_6,mother_0_3,mother_4_6,mother_7_12,mother_13_24,mother_25_60,mother_0_6,mother_0_9,mother_0_12,mother_0_24,mother_0_60):
     """
     Evaluate loan eligibility based on rules.
@@ -1256,7 +1256,7 @@ def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, d
     bank_rules = BANK_RULES.get(bank_name)
     if not bank_rules:
         return ["Bank not supported"]
-   
+    print("############################################",dpd_1_above)
     checks = {
         "CIBIL Score": (cibil_score, bank_rules["cibil_score"]),
         "CIBIL Enquiry Count": (enquiry_count, bank_rules["cibil_enquiry_count"]),
@@ -1265,6 +1265,7 @@ def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, d
         "DPD 1-Above": (dpd_1_above, bank_rules["dpd_1_above"]),
         "DPD 31-44": (dpd_31_44, bank_rules["dpd_31_44"]),
         "DPD 45 Above": (dpd_45_above, bank_rules["dpd_45_above"]),
+        "total_loan_amount":(total_loan_amount,bank_rules["loan_amount"]),
         "Car Age": (car_age, bank_rules["car_age"]),
         "Car Owner Age": (car_owner_age, bank_rules["car_owner_age"]),
         "other Bounces 0-3 Months": (bounces_0_3, bank_rules["bounces_0_3_months"]),
@@ -1357,6 +1358,23 @@ def analyze():
     if month_diff < 0 or (month_diff == 0 and day_diff < 0):
         year_diff -= 1
     
+
+        # Define keywords to identify relevant loan types
+    keywords = ["used", "auto", "personal","business"]
+    
+    # Get the accounts list
+    accounts = data["data"]["credit_report"][0]["accounts"]
+    
+    # Filter and sum highCreditAmount for loan types matching keywords
+    total_loan_amount = sum(
+        int(account.get("highCreditAmount", 0))
+        for account in accounts
+        if any(keyword in account.get("accountType", "").lower() for keyword in keywords)
+    )
+    
+    print(f"Total loan amount (used/auto/personal): {total_loan_amount}")
+
+
     # Example usage
     dpd_summary = count_custom_dpd_buckets(data)
     
@@ -1435,6 +1453,7 @@ def analyze():
             int(dpd_1_above),
             int(dpd_31_44_count),
             int(dpd_45_above),
+            int(total_loan_amount),
             int(total_months), 
             int(year_diff), 
             int(bounce_0_3), 
@@ -1464,4 +1483,4 @@ def analyze():
     return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(port=5001,debug=True)
