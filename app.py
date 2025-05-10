@@ -1483,4 +1483,4 @@ def analyze():
     return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {})
 
 if __name__ == '__main__':
-    app.run(port=5001,debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
