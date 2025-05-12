@@ -1329,10 +1329,7 @@ def analyze():
                     except ValueError:
                         print(f"Invalid date format: {enquiry_date_str}")
     
-    #loan
-    accounts = data["data"]["credit_report"][0]["accounts"]
-    # Calculate total loan amount by summing highCreditAmount
-    total_loan_amount = sum(int(account["highCreditAmount"]) for account in accounts)
+
     # Get the registration date from the data
     registration_date_str = data_car["data"]["data"]["registration_date"]
     registration_date = datetime.strptime(registration_date_str, "%Y-%m-%d")
@@ -1359,21 +1356,52 @@ def analyze():
         year_diff -= 1
     
 
-        # Define keywords to identify relevant loan types
-    keywords = ["used", "auto", "personal","business"]
     
+
+    # Define keywords to identify relevant loan types
+    keywords = ["used", "auto", "personal", "business"]
+
     # Get the accounts list
     accounts = data["data"]["credit_report"][0]["accounts"]
-    
-    # Filter and sum highCreditAmount for loan types matching keywords
-    total_loan_amount = sum(
-        int(account.get("highCreditAmount", 0))
-        for account in accounts
-        if any(keyword in account.get("accountType", "").lower() for keyword in keywords)
-    )
-    
-    print(f"Total loan amount (used/auto/personal): {total_loan_amount}")
 
+    # Get today's date
+    current_date = datetime.today()
+    current_year = current_date.year
+    current_month = current_date.month
+
+    # Initialize highest loan amount
+    total_loan_amount = 0
+
+    # Loop through each account
+    for account in accounts:
+        account_type = account.get("accountType", "").lower()
+        if any(keyword in account_type for keyword in keywords):
+            monthly_status = account.get("monthlyPayStatus", [])
+            
+            # Check latest funding condition (less than 3 months of data)
+            if len(monthly_status) <= 3:
+                # Parse dateOpened
+                print("shdjsdhjsdjsdhjsh")
+                try:
+                    date_opened = datetime.strptime(account.get("dateOpened", ""), "%Y-%m-%d")
+
+                    # Calculate month difference (treat current month as 0)
+                    month_diff = (current_year - date_opened.year) * 12 + (current_month - date_opened.month)
+                    print("month_diff",month_diff)
+                    # Only consider loans opened in last 5 months (0 to 4)
+                    if 0 <= month_diff < 5:
+                        loan_amount = int(account.get("highCreditAmount", 0))
+                        print("loan amount",loan_amount)
+                        if loan_amount > total_loan_amount:
+                            total_loan_amount = loan_amount
+                except (ValueError, TypeError):
+                    continue  # skip invalid dates
+
+    print(f"Highest recent latest-funded loan amount (0–4 months): {total_loan_amount}")
+
+
+
+    
 
     # Example usage
     dpd_summary = count_custom_dpd_buckets(data)
