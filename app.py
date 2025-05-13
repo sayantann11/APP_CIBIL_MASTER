@@ -163,7 +163,7 @@ BANK_RULES = {
             (0, 0, "PASS"), (1, 5, "PASS"),(6,9,'PASS'), (10, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
-            (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "PASS"), (11, float('inf'), "PASS")
+            (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_44": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, float('inf'), "PASS")
@@ -1379,7 +1379,7 @@ def analyze():
             monthly_status = account.get("monthlyPayStatus", [])
             
             # Check latest funding condition (less than 3 months of data)
-            if len(monthly_status) <= 3:
+            if len(monthly_status) < 3:
                 # Parse dateOpened
                 print("shdjsdhjsdjsdhjsh")
                 try:
