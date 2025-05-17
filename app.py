@@ -1637,5 +1637,258 @@ def analyze():
     # Safely pass the data to the template
     return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name)
 
+
+
+def process_eligibility(pan_number, vehicle_data):
+    data = get_cibil_data(pan_number)
+    # Otherwise try API
+    rc_api_url = "https://api-rc-cibil.onrender.com/fetch_car"
+    payload = {"id_number": vehicle_data}
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(rc_api_url, json=payload, headers=headers)
+    data_car = response.json()
+    if data_car:
+        rc_info = data_car.get('data', {}).get('data', {})
+        owner_name = rc_info.get('owner_name', 'Not Available')
+        financer_name = rc_info.get('financer', 'Not Available')
+   
+    
+    active_loans = get_active_loan_banks(data)
+    print(f"Found {len(active_loans)} active loans (non-credit-card)")
+    name = get_field("data.name",data)
+    credit_score = get_field("data.credit_score",data)
+    print("name :",name)
+    print("credit score :",credit_score)
+    #Define valid enquiryPurpose codes for PL, BL, LAP, CVL
+    valid_purpose_codes = {"01","05","17","32","50","51","53","54","61"}
+    today = datetime.today()
+    start_date = (today.replace(day=1) - relativedelta(months=3))
+    enquiry_count = 0
+    enquiries = data["data"]["credit_report"][0].get("enquiries", [])
+    for enquiry in enquiries:
+                enquiry_date_str = enquiry.get("enquiryDate")  # date format: YYYY-MM-DD
+                enquiry_purpose = enquiry.get("enquiryPurpose", "")
+
+                if enquiry_date_str and enquiry_purpose in valid_purpose_codes:
+                    try:
+                        enquiry_date = datetime.strptime(enquiry_date_str, "%Y-%m-%d")
+                        if enquiry_date >= start_date:
+                            enquiry_count += 1
+                    except ValueError:
+                        print(f"Invalid date format: {enquiry_date_str}")
+    
+
+    # Get the registration date from the data
+    registration_date_str = data_car["data"]["data"]["registration_date"]
+    registration_date = datetime.strptime(registration_date_str, "%Y-%m-%d")
+    current_date = datetime.today()
+    year_diff = current_date.year - registration_date.year
+    month_diff = current_date.month - registration_date.month
+    total_months = (year_diff * 12) + month_diff
+
+            # Adjust if the current day is before the registration day
+    if current_date.day < registration_date.day:
+            total_months -= 1
+
+
+    # Get the birth date from the CIBIL report
+    birth_date_str = data["data"]["credit_report"][0]["names"][0]["birthDate"]
+    birth_date = datetime.strptime(birth_date_str, "%Y-%m-%d")
+    current_date = datetime.today()
+                # Calculate age in years
+    year_diff = current_date.year - birth_date.year
+    month_diff = current_date.month - birth_date.month
+    day_diff = current_date.day - birth_date.day
+    # Adjust if birthday hasn't occurred this year
+    if month_diff < 0 or (month_diff == 0 and day_diff < 0):
+        year_diff -= 1
+    
+
+    
+
+    # Define keywords to identify relevant loan types
+    keywords = ["used", "auto", "personal", "business"]
+
+    # Get the accounts list
+    accounts = data["data"]["credit_report"][0]["accounts"]
+
+    # Get today's date
+    current_date = datetime.today()
+    current_year = current_date.year
+    current_month = current_date.month
+
+    # Initialize highest loan amount
+    total_loan_amount = 0
+
+    # Loop through each account
+    for account in accounts:
+        account_type = account.get("accountType", "").lower()
+        if any(keyword in account_type for keyword in keywords):
+            monthly_status = account.get("monthlyPayStatus", [])
+            
+            # Check latest funding condition (less than 3 months of data)
+            if len(monthly_status) <= 3:
+                # Parse dateOpened
+                
+                try:
+                    date_opened = datetime.strptime(account.get("dateOpened", ""), "%Y-%m-%d")
+
+                    # Calculate month difference (treat current month as 0)
+                    month_diff = (current_year - date_opened.year) * 12 + (current_month - date_opened.month)
+                    print("month_diff",month_diff)
+                    # Only consider loans opened in last 5 months (0 to 4)
+                    if 0 <= month_diff < 5:
+                        loan_amount = int(account.get("highCreditAmount", 0))
+                        print("loan amount",loan_amount)
+                        if loan_amount > total_loan_amount:
+                            total_loan_amount = loan_amount
+                except (ValueError, TypeError):
+                    continue  # skip invalid dates
+
+    print(f"Highest recent latest-funded loan amount (0–4 months): {total_loan_amount}")
+
+
+
+    
+
+    # Example usage
+    dpd_summary = count_custom_dpd_buckets(data)
+    
+    
+    mother_loan = find_mother_auto_loan(data, data_car)
+   
+    current_date = datetime.today().strftime("%Y-%m-%d")
+    exclude_account_number = mother_loan.get("accountNumber") if mother_loan else None
+
+    bounces = count_bounces_by_period(data, current_date=current_date, exclude_account_number=exclude_account_number)
+    # Store individual values from summary dictionary into variables
+    dpd_1_30_count = dpd_summary.get("dpd_1_30", 0)
+    dpd_1_45_count = dpd_summary.get("dpd_1_45", 0)
+    dpd_1_above = dpd_summary.get("dpd_1_above", 0)
+    dpd_31_44_count = dpd_summary.get("dpd_31_44", 0)
+    dpd_45_above = dpd_summary.get("dpd_45_above", 0)
+    bounce_0_3 = bounces["bounces_0_3_months"]
+    bounces_0_6 =  bounces["bounces_0_6_months"]
+    
+    print("##############################")
+    print("Valid PL/BL/LAP/CVL enquiries in current + last 3 calendar months:", enquiry_count)
+    print(f"Total loan amount: {total_loan_amount}")
+    print(f"Car Age in months: {total_months}")
+    print(f"Car Owner Age (based on CIBIL birthDate): {year_diff} years")
+    print("Custom DPD Summary in Last 12 Months:", dpd_summary)
+    print("Bounce Summary:")
+    print(bounces)
+    print("dpd 1-30",dpd_1_30_count)
+    print("dpd 1-45",dpd_1_45_count)
+    print("dpd 1 and above",dpd_1_above)
+    print("dpd 31-45",dpd_31_44_count)
+    print("dpd 45 and above",dpd_45_above)
+    
+     #calculation of mother auto loan
+            
+    mother_0_3 =    0
+    mother_4_6 =0
+    mother_7_12 = 0
+    mother_13_24 = 0
+    mother_25_60 = 0
+    mother_0_6 =0
+    mother_0_9 =0
+    mother_0_12 = 0
+    mother_0_24 = 0
+    mother_0_60 = 0
+    if mother_loan:
+        bounces = calculate_bounce_ranges(mother_loan)
+        print("✅ Mother Loan Found")
+        print("Account Number:", mother_loan["accountNumber"])
+        print("Bank:", mother_loan.get("memberShortName", "Unknown"))
+        print("Loan Opened On:", mother_loan.get("dateOpened", "N/A"))
+        print(format_bounce_summary(bounces))
+        mother_0_3 = bounces["0_3"]
+        mother_4_6 = bounces["4_6"]
+        mother_7_12 = bounces["7_12"]
+        mother_13_24 = bounces["13_24"]
+        mother_25_60 = bounces["25_60"]
+        mother_0_6 = bounces["0_6"]
+        mother_0_9 = bounces["0_9"]
+        mother_0_12 = bounces["0_12"]
+        mother_0_24 = bounces["0_24"]
+        mother_0_60 = bounces["0_60"]
+    else:
+        print("❌ No matching Auto/Car loan found.")
+        
+    banks = ['HERO', 'TATA', 'BAJAJ','IDFC', 'YES BANK', 'PIRAMAL', 'HDFC', 'ICICI', 'POONAWALA', 'AU', 'CHOLA','AXIS']
+    accepted_banks = []
+    rejected_banks = {}
+    for bank in banks:
+        result = evaluate_loan_eligibility(
+            bank, 
+            int(credit_score), 
+            int(enquiry_count), 
+            int(dpd_1_30_count), 
+            int(dpd_1_45_count),
+            int(dpd_1_above),
+            int(dpd_31_44_count),
+            int(dpd_45_above),
+            int(total_loan_amount),
+            int(total_months), 
+            int(year_diff), 
+            int(bounce_0_3), 
+            int(bounces_0_6),
+            int(mother_0_3),
+            int(mother_4_6),
+            int(mother_7_12),
+            int(mother_13_24),
+            int(mother_25_60),
+            int(mother_0_6),
+            int(mother_0_9),
+            int(mother_0_12),
+            int(mother_0_24),
+            int(mother_0_60)
+        )
+    
+        if result == "Eligible for Loan":
+            accepted_banks.append(bank)
+        else:
+            rejected_banks[bank] = result  # Store rejection reason
+    
+    
+    bounce_summary = format_bounce_summary(bounces)
+    
+    eligibility_result =1        
+
+    
+    return {
+        "eligibility_result": 1,
+        "accepted_banks": accepted_banks,
+        "rejected_banks": rejected_banks,
+        "bounce_summary": bounce_summary,
+        "pan_number": pan_number,
+        "name": name,
+        "owner_name": owner_name,
+        "financer_name": financer_name,
+        "active_loans": active_loans,
+        "mother_loan": mother_loan or {},
+        "rc_data": data_car or {},
+        "cibil_data": data or {}
+    }
+
+
+@app.route('/api/analyze', methods=['POST'])
+def analyze_api():
+    payload = request.json
+    pan_number = payload.get('pan_number')
+    vehicle_number = payload.get('vehicle_number')
+
+    if not pan_number or not vehicle_number:
+        return jsonify({"error": "Missing PAN or RC data"}), 400
+    
+    try:
+        result = process_eligibility(pan_number, vehicle_number)
+        
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
