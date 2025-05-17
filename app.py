@@ -4,7 +4,7 @@ from flask import jsonify, make_response
 import json
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
+from typing import List, Dict, Tuple
 
 BANK_RULES = {
     "HERO": {
@@ -916,7 +916,7 @@ def vehicle():
                     "source": "manual"
                 
             }
-            return redirect(url_for('pan'))
+            return redirect(url_for('prefill_pan'))
 
         # Otherwise try API
         rc_api_url = "https://api-rc-cibil.onrender.com/fetch_car"
@@ -929,7 +929,7 @@ def vehicle():
 
             if response.status_code == 200 and data_car.get("status") != "error":
                 session['rc_data'] = data_car
-                return redirect(url_for('pan'))
+                return redirect(url_for('prefill_pan'))
             else:
                 error = "Vehicle details not found. Please enter registration date manually."
                 return render_template('vehicle.html', error=error, vehicle_number=vehicle_number)
@@ -939,6 +939,96 @@ def vehicle():
             return render_template('vehicle.html', error=error)
 
     return render_template('vehicle.html')
+
+@app.route('/prefill_pan', methods=['GET', 'POST'])
+def prefill_pan():
+    if request.method == 'POST':
+        mobile = request.form['mobile']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        cibil_option = request.form.get('cibil_option', 'Fetch_CIBIL')
+        # Step 1: PAN Prefill API
+        pan_prefill_url = 'https://profilex-api.neokred.tech/core-svc/api/v2/exp/mobile-intelligence/mobile-to-pan'
+        headers = {
+            'client-user-id': '847ee7f5-9e05-4099-bc9e-57848d8bb77a',
+            'secret-key': '64573798-eeba-47b6-b84c-405ee3636d1f',
+            'access-key': '2ef62bd6-0fb7-4242-a9e1-41ed14da24e9',
+            'service-id': '793c2b4d-32be-4e97-9695-beb405a0f4bf',
+            'Content-Type': 'application/json'
+        }
+        payload = {
+            "mobile": mobile,
+            "firstName": first_name,
+            "lastName": last_name
+        }
+
+        try:
+            response = requests.post(pan_prefill_url, json=payload, headers=headers)
+            
+            data = response.json()
+            if response.status_code == 200:
+               
+                pan_number = data.get('data', {}).get('pan')
+            
+                full_name = data.get('fullName', f"{first_name} {last_name}")
+              
+                gender = data.get('gender', 'Male')
+                consent = 'Y'
+
+                cibil_option = request.form.get('cibil_option', 'remote')
+
+                if cibil_option == 'Fetch_CIBIL':
+                    cibil_api_url = "https://api-rc-cibil.onrender.com/fetch_cibil"
+                else:
+                    print("hdkfjhdfjhafhakshf")
+                    cibil_api_url = "https://api-rc-cibil.onrender.com/overwrite_cibil"
+                cibil_payload = {
+                    "mobile": mobile,
+                    "pan": pan_number,
+                    "name": full_name,
+                    "gender": gender,
+                    "consent": consent
+                }
+
+                cibil_response = requests.post(cibil_api_url, json=cibil_payload, headers={'Content-Type': 'application/json'})
+                cibil_data = cibil_response.json()
+
+                if cibil_response.status_code == 200 and cibil_data.get("status") != "error":
+                    session['pan_number'] = pan_number
+                    session['mobile'] = mobile
+                    session['name'] = full_name
+                    session['gender'] = gender
+                    session['consent'] = 'Y'
+                    # Optionally store cibil_data too if needed
+                    return redirect(url_for('analyze'))
+                else:
+                    error = "Neokard  API failed Mobile Number and Name doesnot match. Please enter PAN details manually."
+                    form_data = {
+                        "mobile": mobile,
+                        "name": full_name
+                    }
+                    print(form_data)
+                    return redirect(url_for('pan'))
+
+            else:
+                error = "PAN Prefill API failed. Please enter details manually."
+                form_data = {
+                    "mobile": mobile,
+                    "name": f"{first_name} {last_name}"
+                }
+                return redirect(url_for('pan'))
+
+        except Exception as e:
+            error = f"API error: {str(e)}"
+            form_data = {
+                "mobile": mobile,
+                "name": f"{first_name} {last_name}"
+            }
+            return render_template('pan.html', error=error, form_data=form_data)
+
+    return render_template('prefill_pan.html')
+
+
 
 
 @app.route('/pan', methods=['GET', 'POST'])
@@ -1294,6 +1384,36 @@ def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, d
     else:
         return "Eligible for Loan"
 
+
+
+
+def get_active_loan_banks(data: dict) -> list:
+    """
+    Extracts the bank names (memberShortName) from active non-credit-card loans.
+
+    Args:
+        data (dict): CIBIL data.
+
+    Returns:
+        list: List of bank names for active loans.
+    """
+    accounts = data["data"]["credit_report"][0].get("accounts", [])
+    active_loan_banks = []
+
+    for account in accounts:
+        account_type = account.get("accountType", "").lower()
+        if "credit card" in account_type:
+            continue  # skip credit cards
+
+        date_closed = account.get("dateClosed", "").strip().lower()
+        if date_closed in ("na", "", "none"):
+            bank = account.get("memberShortName", "Unknown Bank")
+            active_loan_banks.append(bank)
+
+    return active_loan_banks
+
+
+
 @app.route('/analyze')
 def analyze():
 
@@ -1306,7 +1426,9 @@ def analyze():
     
     data_car = session.get('rc_data')
     
-    
+    active_loans = get_active_loan_banks(data)
+    print(f"Found {len(active_loans)} active loans (non-credit-card)")
+
     name = get_field("data.name",data)
     credit_score = get_field("data.credit_score",data)
     print("name :",name)
@@ -1379,9 +1501,9 @@ def analyze():
             monthly_status = account.get("monthlyPayStatus", [])
             
             # Check latest funding condition (less than 3 months of data)
-            if len(monthly_status) < 3:
+            if len(monthly_status) <= 3:
                 # Parse dateOpened
-                print("shdjsdhjsdjsdhjsh")
+                
                 try:
                     date_opened = datetime.strptime(account.get("dateOpened", ""), "%Y-%m-%d")
 
@@ -1508,7 +1630,7 @@ def analyze():
     
     eligibility_result =1
     # Safely pass the data to the template
-    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {})
+    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
