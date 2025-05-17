@@ -1425,6 +1425,11 @@ def analyze():
     data = get_cibil_data(pan_number)
     
     data_car = session.get('rc_data')
+    if data_car:
+        rc_info = data_car.get('data', {}).get('data', {})
+        owner_name = rc_info.get('owner_name', 'Not Available')
+        financer_name = rc_info.get('financer', 'Not Available')
+   
     
     active_loans = get_active_loan_banks(data)
     print(f"Found {len(active_loans)} active loans (non-credit-card)")
@@ -1630,7 +1635,7 @@ def analyze():
     
     eligibility_result =1
     # Safely pass the data to the template
-    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans)
+    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
