@@ -1873,6 +1873,94 @@ def process_eligibility(pan_number, vehicle_data):
     }
 
 
+
+@app.route('/api/output', methods=['POST'])
+def output():
+    payload = request.json
+    vehicle_number = payload.get('vehicle_number')
+    phone_number = payload.get('phone_number')
+    first_name = payload.get('first_name')
+    last_name = payload.get('last_name')
+
+    #rc_api_url = "https://api-rc-cibil.onrender.com/fetch_car"
+    headers_json = {"Content-Type": "application/json"}
+    #rc_payload = {"id_number": vehicle_number}
+
+    try:
+        # Step 1: Vehicle RC API
+        #response = requests.post(rc_api_url, json=rc_payload, headers=headers_json)
+        #data_car = response.json()
+#
+        #if response.status_code != 200 or data_car.get("status") == "error":
+        #    return jsonify({"error": "Vehicle details not found. Please enter registration date manually."}), 400
+
+        # Step 2: PAN Prefill API
+        pan_prefill_url = 'https://profilex-api.neokred.tech/core-svc/api/v2/exp/mobile-intelligence/mobile-to-pan'
+        pan_headers = {
+            'client-user-id': '847ee7f5-9e05-4099-bc9e-57848d8bb77a',
+            'secret-key': '64573798-eeba-47b6-b84c-405ee3636d1f',
+            'access-key': '2ef62bd6-0fb7-4242-a9e1-41ed14da24e9',
+            'service-id': '793c2b4d-32be-4e97-9695-beb405a0f4bf',
+            'Content-Type': 'application/json'
+        }
+        pan_payload = {
+            "mobile": phone_number,
+            "firstName": first_name,
+            "lastName": last_name
+        }
+
+        response = requests.post(pan_prefill_url, json=pan_payload, headers=pan_headers)
+        data = response.json()
+
+        if response.status_code == 200:
+            pan_number = data.get('data', {}).get('pan')
+            print(pan_number)
+            full_name = data.get('fullName', f"{first_name} {last_name}")
+            gender = data.get('gender', 'Male')
+            consent = 'Y'
+
+            # Step 3: CIBIL API
+            cibil_api_url = "https://api-rc-cibil.onrender.com/fetch_cibil"
+            cibil_payload = {
+                "mobile": phone_number,
+                "pan": pan_number,
+                "name": full_name,
+                "gender": gender,
+                "consent": consent
+            }
+
+            cibil_response = requests.post(cibil_api_url, json=cibil_payload, headers=headers_json)
+            cibil_data = cibil_response.json()
+            if cibil_response.status_code != 200 or cibil_data.get("status") == "error":
+                return jsonify({
+                    "error": "CIBIL API failed. Mobile number and name do not match."
+                }), 400
+            if not pan_number or not vehicle_number:
+                return jsonify({"error": "Missing PAN or RC data"}), 400
+            
+            
+            
+            result = process_eligibility(pan_number, vehicle_number)
+            return jsonify(result), 200
+            
+           
+
+        else:
+            return jsonify({"error": "PAN Prefill API failed. Please enter details manually."}), 400
+
+    except Exception as e:
+        return jsonify({"error": f"API call failed: {str(e)}"}), 500
+            
+    
+
+    
+
+
+
+
+
+
+
 @app.route('/api/analyze', methods=['POST'])
 def analyze_api():
     payload = request.json
