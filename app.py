@@ -9,11 +9,11 @@ from typing import List, Dict, Tuple
 BANK_RULES = {
     "HERO": {
         "cibil_score": [
-            (300, 650, "PASS"), (651, 699, "PASS"), (700, 719, "PASS"),
+            (300, 650, "REJECT"), (651, 699, "PASS"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
         "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "PASS"), (11, float('inf'), "PASS")
+            (0, 0, "PASS"), (1, 5, "PASS"), (6, 14, "PASS"), (15, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -29,6 +29,18 @@ BANK_RULES = {
         ],
         "dpd_45_above": [
             (0, 0, "PASS"), (1, float('inf'), "REJECT")
+        ],
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
         ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "PASS"), (97, 108, "PASS"), (109, 120, "PASS"),
@@ -104,6 +116,18 @@ BANK_RULES = {
         "dpd_45_above": [
             (0, 0, "PASS"), (1, float('inf'), "REJECT")
         ],
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "PASS"), (97, 108, "REJECT"), (109, 120, "REJECT"),
             (121, 132, "REJECT"), (133, 144, "REJECT"), (145, float('inf'), "REJECT")
@@ -114,7 +138,7 @@ BANK_RULES = {
             (31, 53, "PASS"), (54, 70, "PASS"), (71, float('inf'), "CHECK OTHER CONDITION")
         ],
         "loan_amount": [
-            (0, 100000, "PASS"), (100001, 500000, "REJECT"), (500001, float('inf'), "REJECT")
+            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "REJECT")
         ],
         "bounces_0_3_months": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 2, "REJECT"), (3, float('inf'), "REJECT")
@@ -177,6 +201,19 @@ BANK_RULES = {
         "dpd_45_above": [
             (0, 1, "PASS"), (2, float('inf'), "REJECT")
         ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "PASS"), (97, 108, "REJECT"), (109, 120, "REJECT"),
             (121, 132, "REJECT"), (133, 144, "REJECT"), (145, float('inf'), "REJECT")
@@ -187,7 +224,7 @@ BANK_RULES = {
             (31, 53, "PASS"), (54, 70, "PASS"), (71, float('inf'), "CHECK OTHER CONDITION")
         ],
         "loan_amount": [
-            (0, 100000, "PASS"), (100001, 500000, "REJECT"), (500001, float('inf'), "REJECT")
+            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "PASS")
         ],
         "bounces_0_3_months": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 2, "PASS"), (3, float('inf'), "REJECT")
@@ -248,7 +285,20 @@ BANK_RULES = {
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_45_above": [
-            (0, 0, "PASS"), (1, float('inf'), "REJECT")
+            (0, 1, "PASS"), (2, float('inf'), "REJECT")
+        ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
         ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "CHECK OTHER CONDITION"), (97, 108, "CHECK OTHER CONDITION"), (109, 120, "REJECT"),
@@ -301,26 +351,39 @@ BANK_RULES = {
     },
     "AXIS": {
         "cibil_score": [
-            (300, 650, "PASS"), (651, 699, "PASS"), (700, 719, "PASS"),
+            (300, 650, "REJECT"), (651, 699, "PASS"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
             (0, 0, "PASS"), (1, 5, "PASS"),(6,7,'PASS'), (6, 14, "PASS"), (15, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
-            (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "PASS"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_44": [
-            (0, 0, "PASS"), (1, 5, "PASS"),(6,10,"PASS"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"),(6,10,"REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_above": [
-            (0, 0, "PASS"), (1, 9, "PASS"), (10, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"), (6, float('inf'), "REJECT")
         ],
         "dpd_31_44": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "PASS"), (11, float('inf'), "PASS")
         ],
         "dpd_45_above": [
             (0, 1, "PASS"), (2, float('inf'), "REJECT")
+        ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
         ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "PASS"), (97, 108, "REJECT"), (109, 120, "REJECT"),
@@ -332,7 +395,7 @@ BANK_RULES = {
             (31, 53, "PASS"), (54, 70, "PASS"), (71, float('inf'), "CHECK OTHER CONDITION")
         ],
         "loan_amount": [
-            (0, 100000, "PASS"), (100001, 500000, "REJECT"), (500001, float('inf'), "REJECT")
+            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "PASS")
         ],
         "bounces_0_3_months": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 2, "PASS"), (3, float('inf'), "REJECT")
@@ -396,6 +459,19 @@ BANK_RULES = {
         "dpd_45_above": [
             (0, 0, "PASS"), (1, float('inf'), "REJECT")
         ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "REJECT"), (97, 108, "REJECT"), (109, 120, "REJECT"),
             (121, 132, "REJECT"), (133, 144, "REJECT"), (145, float('inf'), "REJECT")
@@ -447,7 +523,7 @@ BANK_RULES = {
     },
      "PIRAMAL": {
         "cibil_score": [
-            (300, 650, "PASS"), (651, 699, "PASS"), (700, 719, "PASS"),
+            (300, 650, "REJECT"), (651, 699, "PASS"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
@@ -468,6 +544,19 @@ BANK_RULES = {
         "dpd_45_above": [
             (0, 0, "PASS"), (1, float('inf'), "REJECT")
         ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "PASS"), (97, 108, "PASS"), (109, 120, "REJECT"),
             (121, 132, "REJECT"), (133, 144, "REJECT"), (145, float('inf'), "REJECT")
@@ -478,7 +567,7 @@ BANK_RULES = {
             (31, 53, "PASS"), (54, 70, "PASS"), (71, float('inf'), "CHECK OTHER CONDITION")
         ],
         "loan_amount": [
-            (0, 100000, "PASS"), (100001, 500000, "REJECT"), (500001, float('inf'), "REJECT")
+            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "PASS")
         ],
         "bounces_0_3_months": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 2, "PASS"), (3, float('inf'), "REJECT")
@@ -519,7 +608,7 @@ BANK_RULES = {
     },
      "HDFC": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "PASS"), (700, 719, "PASS"),
+            (300, 650, "REJECT"), (651, 699, "REJECT"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
@@ -539,6 +628,19 @@ BANK_RULES = {
         ],
         "dpd_45_above": [
             (0, 0, "PASS"), (1, float('inf'), "REJECT")
+        ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
         ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "REJECT"), (97, 108, "REJECT"), (109, 120, "REJECT"),
@@ -612,6 +714,19 @@ BANK_RULES = {
         "dpd_45_above": [
             (0, 0, "PASS"), (1, float('inf'), "REJECT")
         ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "PASS"), (97, 108, "REJECT"), (109, 120, "REJECT"),
             (121, 132, "REJECT"), (133, 144, "REJECT"), (145, float('inf'), "REJECT")
@@ -682,7 +797,20 @@ BANK_RULES = {
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_45_above": [
-            (0, 0, "PASS"), (1, float('inf'), "REJECT")
+            (0, 1, "PASS"), (2, float('inf'), "REJECT")
+        ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
         ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "PASS"), (97, 108, "PASS"), (109, 120, "PASS"),
@@ -694,7 +822,7 @@ BANK_RULES = {
             (31, 53, "PASS"), (54, 70, "PASS"), (71, float('inf'), "CHECK OTHER CONDITION")
         ],
         "loan_amount": [
-            (0, 100000, "PASS"), (100001, 500000, "REJECT"), (500001, float('inf'), "REJECT")
+            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "PASS")
         ],
         "bounces_0_3_months": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 2, "PASS"), (3, float('inf'), "REJECT")
@@ -756,6 +884,19 @@ BANK_RULES = {
         "dpd_45_above": [
             (0, 0, "PASS"), (1, float('inf'), "PASS")
         ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "PASS"), (97, 108, "PASS"), (109, 120, "PASS"),
             (121, 132, "PASS"), (133, 144, "PASS"), (145, float('inf'), "PASS")
@@ -766,7 +907,7 @@ BANK_RULES = {
             (31, 53, "PASS"), (54, 70, "PASS"), (71, float('inf'), "CHECK OTHER CONDITION")
         ],
         "loan_amount": [
-            (0, 100000, "PASS"), (100001, 500000, "REJECT"), (500001, float('inf'), "REJECT")
+            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "REJECT")
         ],
         "bounces_0_3_months": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 2, "PASS"), (3, float('inf'), "REJECT")
@@ -827,6 +968,19 @@ BANK_RULES = {
         ],
         "dpd_45_above": [
             (0, 0, "PASS"), (1, float('inf'), "PASS")
+        ],
+        
+        "settlements_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "settlements_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
+        ],
+        "writeoff_last_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "REJECT")
+        ],
+        "writeoff_older_than_24_months":[
+            (-1,0,"PASS"),(1, float('inf'), "PASS")
         ],
         "car_age": [
             (0, 84, "PASS"), (85, 96, "PASS"), (97, 108, "PASS"), (109, 120, "PASS"),
@@ -1154,6 +1308,26 @@ def count_custom_dpd_buckets(data):
     return dpd_counts
 
 
+
+
+def count_settlements(data):
+    settlement_count = 0
+    current_date = datetime.today()  # Not used in logic here but included per pattern
+
+    accounts = data.get("data", {}).get("credit_report", [])[0].get("accounts", [])
+
+    for account in accounts:
+        try:
+            wo_amount_total = float(account.get("woAmountTotal", -1))
+            if wo_amount_total > 0:
+                settlement_count += 1
+        except (TypeError, ValueError):
+            continue  # Skip invalid values
+
+    return settlement_count
+
+
+
 def count_bounces_by_period(data, current_date=None, exclude_account_number=None):
     if current_date is None:
         current_date = datetime.today()
@@ -1213,7 +1387,7 @@ def find_mother_auto_loan(data, data_car):
     registration_date = datetime.strptime(registration_date_str, "%Y-%m-%d")
     valid_months = {
         (registration_date - relativedelta(months=i)).strftime("%Y-%m")
-        for i in range(3)
+        for i in range(4)
     }
 
     accounts = data.get("data", {}).get("credit_report", [{}])[0].get("accounts", [])
@@ -1335,7 +1509,7 @@ def check_condition(value, rules):
         if min_val <= value <= max_val:
             return result
     return "Invalid"
-def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, dpd_1_44,dpd_1_above, dpd_31_44, dpd_45_above,total_loan_amount,
+def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, dpd_1_44,dpd_1_above, dpd_31_44, dpd_45_above,settlements_last_24_months,settlements_older_than_24_months,writeoff_last_24_months,writeoff_older_than_24_months,total_loan_amount,
                               car_age, car_owner_age, bounces_0_3, bounces_0_6,mother_0_3,mother_4_6,mother_7_12,mother_13_24,mother_25_60,mother_0_6,mother_0_9,mother_0_12,mother_0_24,mother_0_60):
     """
     Evaluate loan eligibility based on rules.
@@ -1346,7 +1520,7 @@ def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, d
     bank_rules = BANK_RULES.get(bank_name)
     if not bank_rules:
         return ["Bank not supported"]
-    print("############################################",dpd_1_above)
+    
     checks = {
         "CIBIL Score": (cibil_score, bank_rules["cibil_score"]),
         "CIBIL Enquiry Count": (enquiry_count, bank_rules["cibil_enquiry_count"]),
@@ -1355,6 +1529,10 @@ def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, d
         "DPD 1-Above": (dpd_1_above, bank_rules["dpd_1_above"]),
         "DPD 31-44": (dpd_31_44, bank_rules["dpd_31_44"]),
         "DPD 45 Above": (dpd_45_above, bank_rules["dpd_45_above"]),
+        "Settlement last 24 months":(settlements_last_24_months,bank_rules["settlements_last_24_months"]),
+        "Settlement old 24 months":(settlements_older_than_24_months,bank_rules["settlements_older_than_24_months"]),
+        "Writeoff last 24 months":(writeoff_last_24_months,bank_rules["writeoff_last_24_months"]),
+        "Writeoff old 24 months":(writeoff_older_than_24_months,bank_rules["writeoff_older_than_24_months"]),
         "total_loan_amount":(total_loan_amount,bank_rules["loan_amount"]),
         "Car Age": (car_age, bank_rules["car_age"]),
         "Car Owner Age": (car_owner_age, bank_rules["car_owner_age"]),
@@ -1411,6 +1589,35 @@ def get_active_loan_banks(data: dict) -> list:
             active_loan_banks.append(bank)
 
     return active_loan_banks
+
+
+
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+def count_settlements_by_age(data):
+    recent_cutoff = datetime.today() - relativedelta(months=24)
+
+    recent_settlements = 0
+    old_settlements = 0
+
+    accounts = data.get("data", {}).get("credit_report", [])[0].get("accounts", [])
+
+    for account in accounts:
+        try:
+            wo_amount_total = float(account.get("woAmountTotal", -1))
+            if wo_amount_total > 0:
+                date_reported_str = account.get("dateReported", "")
+                if date_reported_str and date_reported_str.lower() != "na":
+                    date_reported = datetime.strptime(date_reported_str, "%Y-%m-%d")
+                    if date_reported >= recent_cutoff:
+                        recent_settlements += 1
+                    else:
+                        old_settlements += 1
+        except (TypeError, ValueError):
+            continue
+
+    return recent_settlements, old_settlements
 
 
 
@@ -1486,7 +1693,7 @@ def analyze():
     
 
     # Define keywords to identify relevant loan types
-    keywords = ["used", "auto", "personal", "business"]
+    keywords = ["personal", "business"]
 
     # Get the accounts list
     accounts = data["data"]["credit_report"][0]["accounts"]
@@ -1519,8 +1726,7 @@ def analyze():
                     if 0 <= month_diff < 5:
                         loan_amount = int(account.get("highCreditAmount", 0))
                         print("loan amount",loan_amount)
-                        if loan_amount > total_loan_amount:
-                            total_loan_amount = loan_amount
+                        total_loan_amount = total_loan_amount+loan_amount
                 except (ValueError, TypeError):
                     continue  # skip invalid dates
 
@@ -1563,8 +1769,18 @@ def analyze():
     print("dpd 31-45",dpd_31_44_count)
     print("dpd 45 and above",dpd_45_above)
     
-     #calculation of mother auto loan
-            
+    recent_settlements, old_settlements = count_settlements_by_age(data)
+
+    # Store in separate variables
+    settlements_last_24_months = recent_settlements
+    settlements_older_than_24_months = old_settlements
+    writeoff_last_24_months = recent_settlements
+    writeoff_older_than_24_months = old_settlements
+    # Print for confirmation
+    print("Settlements in the last 24 months:", settlements_last_24_months)
+    print("Settlements older than 24 months:", settlements_older_than_24_months)
+    print("Settlements older than 24 months:", writeoff_last_24_months)
+    print("Settlements in the last 24 months:", writeoff_older_than_24_months)
     mother_0_3 =    0
     mother_4_6 =0
     mother_7_12 = 0
@@ -1608,6 +1824,10 @@ def analyze():
             int(dpd_1_above),
             int(dpd_31_44_count),
             int(dpd_45_above),
+            int(settlements_last_24_months),
+            int(settlements_older_than_24_months),
+            int(writeoff_last_24_months),
+            int(writeoff_older_than_24_months),
             int(total_loan_amount),
             int(total_months), 
             int(year_diff), 
@@ -1635,7 +1855,7 @@ def analyze():
     
     eligibility_result =1
     # Safely pass the data to the template
-    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name)
+    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name,credit_score=credit_score)
 
 
 
@@ -1707,7 +1927,7 @@ def process_eligibility(pan_number, vehicle_data):
     
 
     # Define keywords to identify relevant loan types
-    keywords = ["used", "auto", "personal", "business"]
+    keywords = ["personal", "business"]
 
     # Get the accounts list
     accounts = data["data"]["credit_report"][0]["accounts"]
@@ -1740,8 +1960,7 @@ def process_eligibility(pan_number, vehicle_data):
                     if 0 <= month_diff < 5:
                         loan_amount = int(account.get("highCreditAmount", 0))
                         print("loan amount",loan_amount)
-                        if loan_amount > total_loan_amount:
-                            total_loan_amount = loan_amount
+                        total_loan_amount = total_loan_amount+loan_amount
                 except (ValueError, TypeError):
                     continue  # skip invalid dates
 
@@ -1785,7 +2004,18 @@ def process_eligibility(pan_number, vehicle_data):
     print("dpd 45 and above",dpd_45_above)
     
      #calculation of mother auto loan
-            
+    recent_settlements, old_settlements = count_settlements_by_age(data)
+
+    # Store in separate variables
+    settlements_last_24_months = recent_settlements
+    settlements_older_than_24_months = old_settlements
+    writeoff_last_24_months = recent_settlements
+    writeoff_older_than_24_months = old_settlements
+    # Print for confirmation
+    print("Settlements in the last 24 months:", settlements_last_24_months)
+    print("Settlements older than 24 months:", settlements_older_than_24_months)
+    print("Settlements older than 24 months:", writeoff_last_24_months)
+    print("Settlements in the last 24 months:", writeoff_older_than_24_months)
     mother_0_3 =    0
     mother_4_6 =0
     mother_7_12 = 0
@@ -1829,6 +2059,10 @@ def process_eligibility(pan_number, vehicle_data):
             int(dpd_1_above),
             int(dpd_31_44_count),
             int(dpd_45_above),
+            int(settlements_last_24_months),
+            int(settlements_older_than_24_months),
+            int(writeoff_last_24_months),
+            int(writeoff_older_than_24_months),
             int(total_loan_amount),
             int(total_months), 
             int(year_diff), 
@@ -1869,7 +2103,8 @@ def process_eligibility(pan_number, vehicle_data):
         "active_loans": active_loans,
         "mother_loan": mother_loan or {},
         "rc_data": data_car or {},
-        "cibil_data": data or {}
+        "cibil_data": data or {},
+        "credit_score": credit_score
     }
 
 
