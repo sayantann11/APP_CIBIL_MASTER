@@ -2093,18 +2093,18 @@ def process_eligibility(pan_number, vehicle_data):
     
     return {
         "eligibility_result": 1,
-        "accepted_banks": accepted_banks,
-        "rejected_banks": rejected_banks,
-        "bounce_summary": bounce_summary,
-        "pan_number": pan_number,
-        "name": name,
-        "owner_name": owner_name,
-        "financer_name": financer_name,
-        "active_loans": active_loans,
-        "mother_loan": mother_loan or {},
+        "7accepted_banks": accepted_banks,
+        "8rejected_banks": rejected_banks,
+        "3bounce_summary": bounce_summary,
+        "2pan_number": pan_number,
+        "1name": name,
+        "4owner_name": owner_name,
+        "5financer_name": financer_name,
+        "6active_loans": active_loans,
+        "9mother_loan": mother_loan or {},
         "rc_data": data_car or {},
         "cibil_data": data or {},
-        "credit_score": credit_score
+        "3credit_score": credit_score
     }
 
 
