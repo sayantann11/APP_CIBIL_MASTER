@@ -1073,7 +1073,7 @@ def vehicle():
             return redirect(url_for('prefill_pan'))
 
         # Otherwise try API
-        rc_api_url = "https://api-rc-cibil.onrender.com/fetch_car"
+        rc_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_car"
         payload = {"id_number": vehicle_number}
         headers = {"Content-Type": "application/json"}
 
@@ -1132,10 +1132,10 @@ def prefill_pan():
                 cibil_option = request.form.get('cibil_option', 'remote')
 
                 if cibil_option == 'Fetch_CIBIL':
-                    cibil_api_url = "https://api-rc-cibil.onrender.com/fetch_cibil"
+                    cibil_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_cibil"
                 else:
                     print("hdkfjhdfjhafhakshf")
-                    cibil_api_url = "https://api-rc-cibil.onrender.com/overwrite_cibil"
+                    cibil_api_url = "https://api-rc-cibil-ei8h.onrender.com/overwrite_cibil"
                 cibil_payload = {
                     "mobile": mobile,
                     "pan": pan_number,
@@ -1195,7 +1195,7 @@ def pan():
         consent = request.form.get('consent', 'N')
 
         # Prepare API call
-        pan_api_url = "https://api-rc-cibil.onrender.com/fetch_cibil"
+        pan_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_cibil"
         payload = {
             "mobile": mobile,
             "pan": pan_number,
@@ -1487,7 +1487,7 @@ def format_bounce_summary(bounce_summary):
 def get_cibil_data(pan):
     """Calls the /get_cibil API with the given PAN and returns the data or None."""
     try:
-        response = requests.get("https://api-rc-cibil.onrender.com/get_cibil", params={"pan": pan})
+        response = requests.get("https://api-rc-cibil-ei8h.onrender.com/get_cibil", params={"pan": pan})
         if response.status_code == 200:
             return response.json().get("data")
         elif response.status_code == 404:
@@ -1876,7 +1876,7 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         }
     else:
         print("case2 ###############################")
-        rc_api_url = "https://api-rc-cibil.onrender.com/fetch_car"
+        rc_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_car"
         payload = {"id_number": vehicle_data}
         headers = {"Content-Type": "application/json"}
         response = requests.post(rc_api_url, json=payload, headers=headers)
@@ -2131,7 +2131,7 @@ def output():
     first_name = payload.get('first_name')
     last_name = payload.get('last_name')
 
-    #rc_api_url = "https://api-rc-cibil.onrender.com/fetch_car"
+    #rc_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_car"
     headers_json = {"Content-Type": "application/json"}
     #rc_payload = {"id_number": vehicle_number}
 
@@ -2169,7 +2169,7 @@ def output():
             consent = 'Y'
 
             # Step 3: CIBIL API
-            cibil_api_url = "https://api-rc-cibil.onrender.com/fetch_cibil"
+            cibil_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_cibil"
             cibil_payload = {
                 "mobile": phone_number,
                 "pan": pan_number,
@@ -2210,7 +2210,7 @@ def output_norc():
     last_name = payload.get('last_name')
     reg_date = payload.get("reg_date")
 
-    #rc_api_url = "https://api-rc-cibil.onrender.com/fetch_car"
+    #rc_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_car"
     headers_json = {"Content-Type": "application/json"}
     #rc_payload = {"id_number": vehicle_number}
 
@@ -2248,7 +2248,7 @@ def output_norc():
             consent = 'Y'
 
             # Step 3: CIBIL API
-            cibil_api_url = "https://api-rc-cibil.onrender.com/fetch_cibil"
+            cibil_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_cibil"
             cibil_payload = {
                 "mobile": phone_number,
                 "pan": pan_number,
