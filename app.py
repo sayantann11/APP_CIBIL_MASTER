@@ -1379,9 +1379,25 @@ def count_bounces_by_period(data, current_date=None, exclude_account_number=None
 
     return bounces
 
+import re
+
+def normalize_financer_name(name):
+    name = name.lower()
+    name = re.sub(r'[^a-z0-9 ]', '', name)  # Remove punctuation
+    tokens = name.split()
+    blacklist = {'bank', 'limited', 'ltd', 'finserv', 'finance', 'fincorp', 'of', 'the', 'co', 'company'}
+    return ' '.join([token for token in tokens if token not in blacklist])
+
+def financer_match(financer1, financer2):
+    norm1 = normalize_financer_name(financer1)
+    norm2 = normalize_financer_name(financer2)
+    return norm1 in norm2 or norm2 in norm1
+
 def find_mother_auto_loan(data, data_car):
     registration_date_str = data_car["data"]["data"].get("registration_date")
-    if not registration_date_str:
+    financer_name_from_rc = data_car["data"]["data"].get("financer", "")
+
+    if not registration_date_str or not financer_name_from_rc:
         return None
 
     registration_date = datetime.strptime(registration_date_str, "%Y-%m-%d")
@@ -1395,6 +1411,7 @@ def find_mother_auto_loan(data, data_car):
     for account in accounts:
         account_type = account.get("accountType", "").lower()
         date_opened = account.get("dateOpened")
+        loan_financer = account.get("memberShortName", "")
 
         if not date_opened or ("auto" not in account_type and "car" not in account_type):
             continue
@@ -1402,7 +1419,9 @@ def find_mother_auto_loan(data, data_car):
         try:
             loan_open_month = datetime.strptime(date_opened, "%Y-%m-%d").strftime("%Y-%m")
             if loan_open_month in valid_months:
-                return account  # Return the full account for further use
+                # Enhanced financer match
+                if financer_match(loan_financer, financer_name_from_rc):
+                    return account
         except ValueError:
             continue
 
@@ -1739,9 +1758,10 @@ def analyze():
     # Example usage
     dpd_summary = count_custom_dpd_buckets(data)
     
-    
+    print("=================================")
     mother_loan = find_mother_auto_loan(data, data_car)
-   
+    print(mother_loan)
+    print("=================================")
     current_date = datetime.today().strftime("%Y-%m-%d")
     exclude_account_number = mother_loan.get("accountNumber") if mother_loan else None
 
@@ -1989,6 +2009,7 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
     
     
     mother_loan = find_mother_auto_loan(data, data_car)
+    print(mother_loan)
    
     current_date = datetime.today().strftime("%Y-%m-%d")
     exclude_account_number = mother_loan.get("accountNumber") if mother_loan else None
@@ -2103,8 +2124,8 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
     bounce_summary = format_bounce_summary(bounces)
     
     eligibility_result =1        
-
     
+    print(mother_loan)
     return {
         "eligibility_result": 1,
         "7accepted_banks": accepted_banks,
@@ -2182,7 +2203,7 @@ def output():
             cibil_data = cibil_response.json()
             if cibil_response.status_code != 200 or cibil_data.get("status") == "error":
                 return jsonify({
-                    "error": "CIBIL API failed. Mobile number and name do not match."
+                    "error": "NEOKRED API failed. Mobile number and name do not match."
                 }), 400
             if not pan_number or not vehicle_number:
                 return jsonify({"error": "Missing PAN or RC data"}), 400
@@ -2195,10 +2216,10 @@ def output():
            
 
         else:
-            return jsonify({"error": "PAN Prefill API failed. Please enter details manually."}), 400
+            return jsonify({"error": "NEOKRED API FAIL Please enter PAN details manually."}), 400
 
     except Exception as e:
-        return jsonify({"error": f"API call failed: {str(e)}"}), 500
+        return jsonify({"error": f"CAR API call failed: {str(e)}"}), 500
             
     
 @app.route('/api/outputnorc', methods=['POST'])
@@ -2261,7 +2282,7 @@ def output_norc():
             cibil_data = cibil_response.json()
             if cibil_response.status_code != 200 or cibil_data.get("status") == "error":
                 return jsonify({
-                    "error": "CIBIL API failed. Mobile number and name do not match."
+                    "error": "NEOKRED API failed. Mobile number and name do not match."
                 }), 400
             if not pan_number or not vehicle_number:
                 return jsonify({"error": "Missing PAN or RC data"}), 400
@@ -2274,11 +2295,72 @@ def output_norc():
            
 
         else:
-            return jsonify({"error": "PAN Prefill API failed. Please enter details manually."}), 400
+            return jsonify({"error": "NEOKRED API FAIL Please enter PAN details manually."}), 400
 
     except Exception as e:
-        return jsonify({"error": f"API call failed: {str(e)}"}), 500
+        return jsonify({"error": f"outputnorc CAR API call failed: {str(e)}"}), 500
     
+
+
+
+
+
+
+
+@app.route('/api/outputnopan', methods=['POST'])
+def output_nopan():
+    try:
+        payload = request.json
+
+        # Extract required fields
+        vehicle_number = payload.get('vehicle_number')
+        phone_number = payload.get('phone_number')
+        first_name = payload.get('first_name')
+        last_name = payload.get('last_name')
+        pan_number = payload.get('pan')
+        gender = payload.get('gender', 'M')  # defaulting to 'M' if not provided
+        # optional or to be derived elsewhere
+
+        # Validate required fields
+        if not all([vehicle_number, phone_number, first_name, last_name, pan_number]):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        full_name = f"{first_name} {last_name}"
+        consent = 'Y'
+
+        # CIBIL API call
+        cibil_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_cibil"
+        headers_json = {"Content-Type": "application/json"}
+        cibil_payload = {
+            "mobile": phone_number,
+            "pan": pan_number,
+            "name": full_name,
+            "gender": gender,
+            "consent": consent
+        }
+
+        cibil_response = requests.post(cibil_api_url, json=cibil_payload, headers=headers_json)
+
+        if cibil_response.status_code != 200:
+            return jsonify({"error": "CIBIL API request failed"}), 400
+
+        cibil_data = cibil_response.json()
+        if cibil_data.get("status") == "error":
+            return jsonify({"error": "CIBIL API returned error"}), 400
+
+        # Ensure reg_date is available for process_eligibility
+
+
+        # Final processing (Assuming process_eligibility is defined elsewhere)
+        result = process_eligibility(pan_number, vehicle_number)
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": f"outputnopan API call failed: {str(e)}"}), 500
+
+
+
 
 
 
