@@ -2184,7 +2184,10 @@ def output():
 
         if response.status_code == 200:
             pan_number = data.get('data', {}).get('pan')
-            print(pan_number)
+            #print(pan_number)
+            if not pan_number:
+                return jsonify({"error": "Missing PAN  NEOKRED SHOW SUCESS but no PAN RETURNED"}), 400
+
             full_name = data.get('fullName', f"{first_name} {last_name}")
             gender = data.get('gender', 'Male')
             consent = 'Y'
@@ -2203,10 +2206,10 @@ def output():
             cibil_data = cibil_response.json()
             if cibil_response.status_code != 200 or cibil_data.get("status") == "error":
                 return jsonify({
-                    "error": "NEOKRED API failed. Mobile number and name do not match."
+                    "error": "CIBIL API request failed"
                 }), 400
-            if not pan_number or not vehicle_number:
-                return jsonify({"error": "Missing PAN or RC data"}), 400
+            if not vehicle_number:
+                return jsonify({"error": "RC data"}), 400
             
             
             
@@ -2282,7 +2285,7 @@ def output_norc():
             cibil_data = cibil_response.json()
             if cibil_response.status_code != 200 or cibil_data.get("status") == "error":
                 return jsonify({
-                    "error": "NEOKRED API failed. Mobile number and name do not match."
+                    "error": "CIBIL API request failed"
                 }), 400
             if not pan_number or not vehicle_number:
                 return jsonify({"error": "Missing PAN or RC data"}), 400
