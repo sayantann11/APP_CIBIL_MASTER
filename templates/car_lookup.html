@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lookup Portal</title>
+</head>
+<body>
+    <h1>Lookup Options</h1>
+
+    <!-- Car Lookup Form -->
+    <h2>Check Car Details</h2>
+    <form method="post">
+        <input type="hidden" name="action" value="car">
+        <label for="id_number">ID Number:</label>
+        <input type="text" name="id_number" required>
+        <button type="submit">Check Car</button>
+    </form>
+
+    <!-- CIBIL Lookup Form -->
+    <h2>Check CIBIL by PAN</h2>
+    <form method="post">
+        <input type="hidden" name="action" value="cibil">
+        <label for="pan">PAN Number:</label>
+        <input type="text" name="pan" required>
+        <button type="submit">Check CIBIL</button>
+    </form>
+
+    <!-- PAN Lookup Form -->
+    <h2>Check PAN by Mobile</h2>
+    <form method="post">
+        <input type="hidden" name="action" value="pan">
+        <label for="mobile">Mobile Number:</label>
+        <input type="text" name="mobile" required>
+        <button type="submit">Check PAN</button>
+    </form>
+
+    <!-- Display & Download Section -->
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if car_data %}
+        <h3>Car Data:</h3>
+        <pre id="car_json">{{ car_data | tojson(indent=2) }}</pre>
+        <button onclick="downloadJSON('car_json', 'car_data.json')">Download Car Data</button>
+    {% endif %}
+
+    {% if cibil_data %}
+        <h3>CIBIL Data:</h3>
+        <pre id="cibil_json">{{ cibil_data | tojson(indent=2) }}</pre>
+        <button onclick="downloadJSON('cibil_json', 'cibil_data.json')">Download CIBIL Data</button>
+    {% endif %}
+
+    {% if pan_data %}
+        <h3>PAN Data:</h3>
+        <pre id="pan_json">{{ pan_data | tojson(indent=2) }}</pre>
+        <button onclick="downloadJSON('pan_json', 'pan_data.json')">Download PAN Data</button>
+    {% endif %}
+
+    <script>
+        function downloadJSON(elementId, filename) {
+            const content = document.getElementById(elementId).innerText;
+            const blob = new Blob([content], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+    </script>
+</body>
+</html>
