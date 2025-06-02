@@ -1655,6 +1655,8 @@ def analyze():
         rc_info = data_car.get('data', {}).get('data', {})
         owner_name = rc_info.get('owner_name', 'Not Available')
         financer_name = rc_info.get('financer', 'Not Available')
+        rc_number = rc_info.get('rc_number','Not Available')
+   
    
     
     active_loans = get_active_loan_banks(data)
@@ -1875,7 +1877,7 @@ def analyze():
     
     eligibility_result =1
     # Safely pass the data to the template
-    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name,credit_score=credit_score)
+    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name,credit_score=credit_score,rc_number=rc_number)
 
 
 
@@ -1905,6 +1907,7 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         rc_info = data_car.get('data', {}).get('data', {})
         owner_name = rc_info.get('owner_name', 'Not Available')
         financer_name = rc_info.get('financer', 'Not Available')
+        rc_number = rc_info.get('rc_number','Not Available')
    
     
     active_loans = get_active_loan_banks(data)
@@ -2137,15 +2140,105 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         "5financer_name": financer_name,
         "6active_loans": active_loans,
         "9mother_loan": mother_loan or {},
+        "10rc_number": rc_number or {},
         "rc_data": data_car or {},
         "cibil_data": data or {},
         "3credit_score": credit_score
     }
 
-
-
 @app.route('/api/output', methods=['POST'])
 def output():
+    payload = request.json
+    vehicle_number = payload.get('vehicle_number')
+    phone_number = payload.get('phone_number')
+    first_name = payload.get('first_name', '')
+    last_name = payload.get('last_name', '')
+    data = {"gender": "Male"}  # default gender fallback
+    headers_json = {"Content-Type": "application/json"}
+
+    if not phone_number:
+        return jsonify({"error": "Missing mobile number"}), 400
+
+    try:
+        # Step 1: Check PAN using internal API
+        get_pan_url = f"https://api-rc-cibil-ei8h.onrender.com/get_pan_by_mobile?mobile={phone_number}"
+        get_pan_response = requests.get(get_pan_url)
+
+        if get_pan_response.status_code == 200:
+            print("yes yes yes yes")
+            pan_number = get_pan_response.json().get("pan")
+        else:
+            # Step 2: Call PAN Prefill API (Neokred)
+            pan_prefill_url = 'https://profilex-api.neokred.tech/core-svc/api/v2/exp/mobile-intelligence/mobile-to-pan'
+            pan_headers = {
+                'client-user-id': '847ee7f5-9e05-4099-bc9e-57848d8bb77a',
+                'secret-key': '64573798-eeba-47b6-b84c-405ee3636d1f',
+                'access-key': '2ef62bd6-0fb7-4242-a9e1-41ed14da24e9',
+                'service-id': '793c2b4d-32be-4e97-9695-beb405a0f4bf',
+                'Content-Type': 'application/json'
+            }
+            pan_payload = {
+                "mobile": phone_number,
+                "firstName": first_name,
+                "lastName": last_name
+            }
+
+            pan_response = requests.post(pan_prefill_url, json=pan_payload, headers=pan_headers)
+            data = pan_response.json()
+            print(data)
+            print("$$$$$$$$$$$$$$")
+            if pan_response.status_code != 200:
+                return jsonify({"error": "NEOKRED API failed. Please enter PAN manually."}), 400
+
+            pan_number = data.get('data', {}).get('pan')
+            if not pan_number:
+                return jsonify({"error": "NEOKRED returned success but no PAN found"}), 400
+
+            # Save PAN using internal API
+            save_payload = {
+                "mobile": phone_number,
+                "pan": pan_number
+            }
+            save_pan_response = requests.post("https://api-rc-cibil-ei8h.onrender.com/save_mobile_pan", json=save_payload)
+            if save_pan_response.status_code != 200:
+                return jsonify({"error": "Failed to save PAN to DB"}), 500
+
+        # Step 3: Call CIBIL API
+        full_name = f"{first_name} {last_name}".strip()
+        gender = data.get('gender', 'Male')  # fallback if missing
+        consent = 'Y'
+
+        cibil_api_url = "https://api-rc-cibil-ei8h.onrender.com/fetch_cibil"
+        cibil_payload = {
+            "mobile": phone_number,
+            "pan": pan_number,
+            "name": full_name,
+            "gender": gender,
+            "consent": consent
+        }
+
+        cibil_response = requests.post(cibil_api_url, json=cibil_payload, headers=headers_json)
+        cibil_data = cibil_response.json()
+
+        if cibil_response.status_code != 200 or cibil_data.get("status") == "error":
+             return jsonify({
+        "error": "CIBIL API request failed",
+        "pan_found": pan_number  # returning the PAN found from NEOKRED
+    }), 400
+
+        if not vehicle_number:
+            return jsonify({"error": "Vehicle number missing"}), 400
+
+        # Step 4: Final Processing
+        result = process_eligibility(pan_number, vehicle_number)
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({"error": f"CAR API call failed: {str(e)}"}), 500
+
+
+@app.route('/api/output9', methods=['POST'])
+def output9():
     payload = request.json
     vehicle_number = payload.get('vehicle_number')
     phone_number = payload.get('phone_number')
@@ -2186,10 +2279,10 @@ def output():
             pan_number = data.get('data', {}).get('pan')
             #print(pan_number)
             if not pan_number:
-                return jsonify({"error": "Missing PAN  NEOKRED SHOW SUCESS but no PAN RETURNED"}), 400
+                return jsonify({"error": "Missing PAN  NEOKRED SHOW SUCESS but no PAN"}), 400
 
             full_name = data.get('fullName', f"{first_name} {last_name}")
-            gender = data.get('gender', 'Male')
+            gender = data.get('gender') or 'Male'
             consent = 'Y'
 
             # Step 3: CIBIL API
@@ -2389,4 +2482,4 @@ def analyze_api():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=6000, debug=True)
