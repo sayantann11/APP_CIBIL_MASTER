@@ -5,6 +5,9 @@ import json
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Tuple
+from myroutes import myroutes  # Import the Blueprint
+
+
 
 BANK_RULES = {
     "HERO": {
@@ -2461,6 +2464,9 @@ def output_nopan():
 
 
 
+@app.route('/hello')
+def hello():
+    return "Hello from myroutes!"
 
 
 
@@ -2479,7 +2485,9 @@ def analyze_api():
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+        
+app = Flask(__name__)
+app.register_blueprint(myroutes)  # Register the Blueprint
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=6000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
