@@ -2,12 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import requests
 from flask import jsonify, make_response
 import json
-from datetime import datetime
+from datetime import datetime , timedelta
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Tuple
-from myroutes import myroutes  # Import the Blueprint
-
-
 
 BANK_RULES = {
     "HERO": {
@@ -1262,8 +1259,11 @@ def get_field(field_path,data):
             return None
     return current
 
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 def count_custom_dpd_buckets(data):
+    print("SAYANTAN")
     today = datetime.today()
     start_date = (today.replace(day=1) - relativedelta(months=12))
     end_date = today
@@ -1276,12 +1276,14 @@ def count_custom_dpd_buckets(data):
         "dpd_45_above": 0,
     }
 
+    allowed_loans = [
+        "auto loan", "two-wheeler loan", "personal loan", "business loan",
+        "home loan", "loan against property", "commercial vehicle loan"
+    ]
+
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
 
-        # Consider only loan-type accounts (adjust as needed)
-        if "loan" not in account_type:
-            continue
 
         for record in account.get("monthlyPayStatus", []):
             date_str = record.get("date")
@@ -1296,19 +1298,29 @@ def count_custom_dpd_buckets(data):
             except (ValueError, TypeError):
                 continue
 
-            if start_date <= dpd_date <= end_date and dpd_days > 0:
-                if 1 <= dpd_days <= 30:
-                    dpd_counts["dpd_1_30"] += 1
-                if 1 <= dpd_days <= 45:
-                    dpd_counts["dpd_1_45"] += 1
-                if dpd_days >= 1:
-                    dpd_counts["dpd_1_above"] += 1
-                if 31 <= dpd_days <= 44:
-                    dpd_counts["dpd_31_44"] += 1
-                if dpd_days >= 45:
-                    dpd_counts["dpd_45_above"] += 1
+            if not (start_date <= dpd_date <= end_date):
+                continue
 
+            if dpd_days <= 0:
+                continue
+
+            # Compute DPD due date & age
+            dpd_due_date = dpd_date + timedelta(days=dpd_days)
+            days_ago = (today - dpd_due_date).days
+            # ✅ Bucket by actual DPD age from today
+            if 0 <= days_ago <= 30:
+                dpd_counts["dpd_1_30"] += 1
+            if 0 <= days_ago <= 45:
+                dpd_counts["dpd_1_45"] += 1
+            if 0 <= days_ago:  # any DPD older than today
+                dpd_counts["dpd_1_above"] += 1
+            if 31 <= days_ago <= 44:
+                dpd_counts["dpd_31_44"] += 1
+            if days_ago >= 45:
+                dpd_counts["dpd_45_above"] += 1
+    print("SAYANTAN")
     return dpd_counts
+
 
 
 
@@ -2464,9 +2476,6 @@ def output_nopan():
 
 
 
-@app.route('/hello')
-def hello():
-    return "Hello from myroutes!"
 
 
 
@@ -2485,9 +2494,7 @@ def analyze_api():
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-        
-app = Flask(__name__)
-app.register_blueprint(myroutes)  # Register the Blueprint
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
