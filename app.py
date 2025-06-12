@@ -1414,8 +1414,21 @@ FINANCER_ALIASES = {
     "PNB": "PUNJAB NATIONAL BANK",
     "AU SFB": "AU SMALL FINANCE BANK",
     "AU SMALL FINANCE BANK": "AU SFB",
-    # Add more as needed
+
+    # 🆕 New mappings from your message
+    "KOTAK PRIME": "KOTAK MAHINDRA PRIME",
+    "KOTAK MAHINDRA PRIME": "KOTAK PRIME",
+
+    "TOYOTAFIN": "TOYOTA FINANCIAL SERVICES INDIA",
+    "TOYOTA FINANCIAL SERVICES INDIA": "TOYOTAFIN",
+
+    "TCL": "TATA MOTORS FINANCE",
+    "TATA MOTORS FINANCE": "TCL",
+
+    "MAHINDRA FINANCE": "MAHINDRA & MAHINDRA FIN SER",
+    "MAHINDRA & MAHINDRA FIN SER": "MAHINDRA FINANCE",
 }
+
 
 def financer_match(financer1, financer2):
     norm1 = normalize_financer_name(financer1)
@@ -1461,8 +1474,7 @@ def find_mother_auto_loan(data, data_car):
         try:
             loan_open_month = datetime.strptime(date_opened, "%Y-%m-%d").strftime("%Y-%m")
             if loan_open_month in valid_months:
-                # Enhanced financer match
-                if financer_match(loan_financer, financer_name_from_rc):
+                if account.get("dateClosed", "").strip().upper() in {"NA", "N/A", ""}:
                     return account
         except ValueError:
             continue
