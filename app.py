@@ -1284,7 +1284,9 @@ def count_custom_dpd_buckets(data):
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
 
-
+        # Consider only loan-type accounts (adjust as needed)
+        if "loan" or "Gold Loan"not in account_type:
+            continue
         for record in account.get("monthlyPayStatus", []):
             date_str = record.get("date")
             status_str = record.get("status")
@@ -1402,11 +1404,34 @@ def normalize_financer_name(name):
     tokens = name.split()
     blacklist = {'bank', 'limited', 'ltd', 'finserv', 'finance', 'fincorp', 'of', 'the', 'co', 'company'}
     return ' '.join([token for token in tokens if token not in blacklist])
+FINANCER_ALIASES = {
+    "SBI": "STATE BANK OF INDIA",
+    "HDFC": "HDFC BANK",
+    "ICICI": "ICICI BANK",
+    "AXIS": "AXIS BANK",
+    "BAJAJ": "BAJAJ FINANCE",
+    "IDFC": "IDFC FIRST BANK",
+    "PNB": "PUNJAB NATIONAL BANK",
+    # Add more as needed
+}
 
 def financer_match(financer1, financer2):
     norm1 = normalize_financer_name(financer1)
     norm2 = normalize_financer_name(financer2)
-    return norm1 in norm2 or norm2 in norm1
+
+    # Direct or partial match
+    if norm1 in norm2 or norm2 in norm1:
+        return True
+
+    # Use alias mapping
+    for short, full in FINANCER_ALIASES.items():
+        short_norm = normalize_financer_name(short)
+        full_norm = normalize_financer_name(full)
+        if (norm1 == short_norm and norm2 == full_norm) or (norm2 == short_norm and norm1 == full_norm):
+            return True
+
+    return False
+
 
 def find_mother_auto_loan(data, data_car):
     registration_date_str = data_car["data"]["data"].get("registration_date")
