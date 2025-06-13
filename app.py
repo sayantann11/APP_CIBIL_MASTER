@@ -1285,7 +1285,7 @@ def count_custom_dpd_buckets(data):
         account_type = account.get("accountType", "").lower()
 
         # Consider only loan-type accounts (adjust as needed)
-        if "loan" or "Gold Loan"not in account_type:
+        if "loan" not in account_type or "gold loan" in account_type:
             continue
         for record in account.get("monthlyPayStatus", []):
             date_str = record.get("date")
