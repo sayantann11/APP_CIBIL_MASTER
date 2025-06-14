@@ -1262,6 +1262,20 @@ def get_field(field_path,data):
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
+
+def get_dpd_eligible_accounts(data):
+    eligible_accounts = []
+    accounts = data.get("data", {}).get("credit_report", [])[0].get("accounts", [])
+
+    for account in accounts:
+        account_type = account.get("accountType", "").lower()
+        account_number = account.get("accountNumber")
+        if "loan" in account_type and "gold loan" not in account_type:
+            eligible_accounts.append(account_number)
+
+    return eligible_accounts
+
+
 def count_custom_dpd_buckets(data):
     print("SAYANTAN")
     today = datetime.today()
@@ -1679,6 +1693,9 @@ def count_settlements_by_age(data):
     accounts = data.get("data", {}).get("credit_report", [])[0].get("accounts", [])
 
     for account in accounts:
+        account_type = account.get("accountType", "").lower()
+        if "credit card" in account_type:
+            continue  # 🚫 Skip credit card accounts
         try:
             wo_amount_total = float(account.get("woAmountTotal", -1))
             if wo_amount_total > 0:
