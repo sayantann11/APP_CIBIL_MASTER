@@ -1285,6 +1285,7 @@ def count_custom_dpd_buckets(data):
         account_type = account.get("accountType", "").lower()
 
         # Consider only loan-type accounts (adjust as needed)
+        # Consider only loan-type accounts (adjust as needed)
         if "loan" not in account_type or "gold loan" in account_type:
             continue
         for record in account.get("monthlyPayStatus", []):
@@ -1306,19 +1307,20 @@ def count_custom_dpd_buckets(data):
             if dpd_days <= 0:
                 continue
 
-            # Compute DPD due date & age
-            dpd_due_date = dpd_date + timedelta(days=dpd_days)
-            days_ago = (today - dpd_due_date).days
-            # ✅ Bucket by actual DPD age from today
-            if 0 <= days_ago <= 30:
+            # ✅ Bucket logic using actual DPD days (status)
+            if 1 <= dpd_days <= 30:
                 dpd_counts["dpd_1_30"] += 1
-            if 0 <= days_ago <= 45:
+
+            if 1 <= dpd_days <= 45:
                 dpd_counts["dpd_1_45"] += 1
-            if 0 <= days_ago:  # any DPD older than today
+
+            if dpd_days >= 1:
                 dpd_counts["dpd_1_above"] += 1
-            if 31 <= days_ago <= 44:
+
+            if 31 <= dpd_days <= 44:
                 dpd_counts["dpd_31_44"] += 1
-            if days_ago >= 45:
+
+            if dpd_days >= 45:
                 dpd_counts["dpd_45_above"] += 1
     print("SAYANTAN")
     return dpd_counts
