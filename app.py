@@ -1484,7 +1484,8 @@ def find_mother_auto_loan(data, data_car):
         date_opened = account.get("dateOpened")
         loan_financer = account.get("memberShortName", "")
 
-        if not date_opened or ("auto" not in account_type and "car" not in account_type):
+        if not date_opened or ("auto" not in account_type and "used" not in account_type):
+            print(account_type)
             continue
 
         try:
