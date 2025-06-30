@@ -1677,7 +1677,11 @@ def get_active_loan_banks(data: dict) -> list:
         date_closed = account.get("dateClosed", "").strip().lower()
         if date_closed in ("na", "", "none"):
             bank = account.get("memberShortName", "Unknown Bank")
-            active_loan_banks.append(bank)
+            account_number = account.get("accountNumber", "Unknown")
+            active_loan_banks.append({
+                "bank": bank,
+                "account_number": account_number
+            })
 
     return active_loan_banks
 
