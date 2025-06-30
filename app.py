@@ -1156,7 +1156,7 @@ def prefill_pan():
                     # Optionally store cibil_data too if needed
                     return redirect(url_for('analyze'))
                 else:
-                    error = "Neokard  API failed Mobile Number and Name doesnot match. Please enter PAN details manually."
+                    error = "NK  API failed Mobile Number and Name doesnot match. Please enter PAN details manually."
                     form_data = {
                         "mobile": mobile,
                         "name": full_name
@@ -1204,7 +1204,8 @@ def pan():
             "consent": consent
         }
         headers = {"Content-Type": "application/json"}
-
+        print("hsidahsdajshdakjshdasjdh ijhdjiashdiashdijsahfjah bfhjsdhfbjdshfjsfhjhjhk")
+        print(payload)
         try:
             response = requests.post(pan_api_url, json=payload, headers=headers)
             data = response.json()
@@ -2220,6 +2221,8 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         "3credit_score": credit_score
     }
 
+
+
 @app.route('/api/output', methods=['POST'])
 def output():
     payload = request.json
@@ -2262,11 +2265,11 @@ def output():
             print(data)
             print("$$$$$$$$$$$$$$")
             if pan_response.status_code != 200:
-                return jsonify({"error": "NEOKRED API failed. Please enter PAN manually."}), 400
+                return jsonify({"error": "NK API failed. Please enter PAN manually."}), 400
 
             pan_number = data.get('data', {}).get('pan')
             if not pan_number:
-                return jsonify({"error": "NEOKRED returned success but no PAN found"}), 400
+                return jsonify({"error": "NK returned success but no PAN found"}), 400
 
             # Save PAN using internal API
             save_payload = {
@@ -2353,7 +2356,7 @@ def output9():
             pan_number = data.get('data', {}).get('pan')
             #print(pan_number)
             if not pan_number:
-                return jsonify({"error": "Missing PAN  NEOKRED SHOW SUCESS but no PAN"}), 400
+                return jsonify({"error": "Missing PAN  NK SHOW SUCESS but no PAN"}), 400
 
             full_name = data.get('fullName', f"{first_name} {last_name}")
             gender = data.get('gender') or 'Male'
@@ -2386,7 +2389,7 @@ def output9():
            
 
         else:
-            return jsonify({"error": "NEOKRED API FAIL Please enter PAN details manually."}), 400
+            return jsonify({"error": "NK API FAIL Please enter PAN details manually."}), 400
 
     except Exception as e:
         return jsonify({"error": f"CAR API call failed: {str(e)}"}), 500
@@ -2465,7 +2468,7 @@ def output_norc():
            
 
         else:
-            return jsonify({"error": "NEOKRED API FAIL Please enter PAN details manually."}), 400
+            return jsonify({"error": "NK API FAIL Please enter PAN details manually."}), 400
 
     except Exception as e:
         return jsonify({"error": f"outputnorc CAR API call failed: {str(e)}"}), 500
@@ -2530,9 +2533,67 @@ def output_nopan():
         return jsonify({"error": f"outputnopan API call failed: {str(e)}"}), 500
 
 
+def mother_calculate(pan_number,account_number):
+    mother_0_3 =    0
+    mother_4_6 =0
+    mother_7_12 = 0
+    mother_13_24 = 0
+    mother_25_60 = 0
+    mother_0_6 =0
+    mother_0_9 =0
+    mother_0_12 = 0
+    mother_0_24 = 0
+    mother_0_60 = 0
+    data = get_cibil_data(pan_number)
+    # fetch the accounts in cibil report
+    accounts = data.get("data", {}).get("credit_report", [{}])[0].get("accounts", [])
 
+    mother_loan = 0
+    for account in accounts:
+        account_number_new = account.get("accountNumber")
+        if account_number == account_number_new:
+            mother_loan = account
+        else:
+            continue
 
+        
 
+    bounces = calculate_bounce_ranges(mother_loan)
+    print("✅ Mother Loan Found")
+    print("Account Number:", mother_loan["accountNumber"])
+    print("Bank:", mother_loan.get("memberShortName", "Unknown"))
+    print("Loan Opened On:", mother_loan.get("dateOpened", "N/A"))
+    print(format_bounce_summary(bounces))
+    bounce_summary =  format_bounce_summary(bounces)
+    mother_0_3 = bounces["0_3"]
+    mother_4_6 = bounces["4_6"]
+    mother_7_12 = bounces["7_12"]
+    mother_13_24 = bounces["13_24"]
+    mother_25_60 = bounces["25_60"]
+    mother_0_6 = bounces["0_6"]
+    mother_0_9 = bounces["0_9"]
+    mother_0_12 = bounces["0_12"]
+    mother_0_24 = bounces["0_24"]
+    mother_0_60 = bounces["0_60"]
+    return {"bounce_summary": bounce_summary}
+
+@app.route('/api/motheroutput',methods=['POST'])
+def motheroutput():
+    payload = request.json
+    pan_number = payload.get('pan_number')
+    account_number = payload.get('account_number')
+
+    if not pan_number or not account_number:
+        return jsonify({"error": "Missing PAN or account number"}), 400
+
+    try:
+        result = mother_calculate(pan_number, account_number)
+
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+    
 
 
 
