@@ -1043,7 +1043,32 @@ app.secret_key = 'aS9!f$#3KL1sdf9asf1##2FF!' # Needed for session
 @app.route('/')
 def index():
     return redirect(url_for('vehicle'))
+def fetch_car_timestamp(api_url="https://api-rc-cibil-ei8h.onrender.com/fetch_car", id_number="MH04LT9464"):
+    """
+    Fetch car data by sending 'id_number' to the API, and return the timestamp.
 
+    Args:
+        api_url (str): The API endpoint to call.
+        id_number (str): The ID number to send in the request payload.
+
+    Returns:
+        int or None: The timestamp value if found, else None.
+    """
+    payload = {
+        "id_number": id_number
+    }
+
+    try:
+        response = requests.post(api_url, json=payload)
+        response.raise_for_status()  # Raise error for bad responses
+        data = response.json()
+        timestamp = data.get("data", {}).get("timestamp")
+        return timestamp
+    except requests.exceptions.RequestException as e:
+        print(f"HTTP Request failed: {e}")
+    except ValueError:
+        print("Invalid JSON response")
+    return None
 
 
 @app.route('/vehicle', methods=['GET', 'POST'])
@@ -1735,8 +1760,14 @@ def analyze():
         owner_name = rc_info.get('owner_name', 'Not Available')
         financer_name = rc_info.get('financer', 'Not Available')
         rc_number = rc_info.get('rc_number','Not Available')
-   
-   
+     # --- Safely get the scoreDate ---
+    
+    score_date = (
+    data.get('data', {})
+        .get('credit_report', [{}])[0]
+        .get('scores', [{}])[0]
+        .get('scoreDate')
+    )
     
     active_loans = get_active_loan_banks(data)
     print(f"Found {len(active_loans)} active loans (non-credit-card)")
@@ -1956,7 +1987,9 @@ def analyze():
     
     eligibility_result =1
     # Safely pass the data to the template
-    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name,credit_score=credit_score,rc_number=rc_number)
+    Date_value = fetch_car_timestamp()
+    print("Timestamp:", Date_value)
+    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name,credit_score=credit_score,rc_number=rc_number,score_date=score_date)
 
 
 
@@ -1988,7 +2021,12 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         financer_name = rc_info.get('financer', 'Not Available')
         rc_number = rc_info.get('rc_number','Not Available')
    
-    
+    score_date = (
+    data.get('data', {})
+        .get('credit_report', [{}])[0]
+        .get('scores', [{}])[0]
+        .get('scoreDate')
+    )
     active_loans = get_active_loan_banks(data)
     print(f"Found {len(active_loans)} active loans (non-credit-card)")
     name = get_field("data.name",data)
@@ -2207,7 +2245,7 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
     
     eligibility_result =1        
     
-    print(mother_loan)
+     
     return {
         "eligibility_result": 1,
         "7accepted_banks": accepted_banks,
@@ -2220,6 +2258,7 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         "6active_loans": active_loans,
         "9mother_loan": mother_loan or {},
         "10rc_number": rc_number or {},
+        "Score Date": scoreDate or {},
         "rc_data": data_car or {},
         "cibil_data": data or {},
         "3credit_score": credit_score
