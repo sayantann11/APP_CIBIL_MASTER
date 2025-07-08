@@ -2258,7 +2258,7 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         "6active_loans": active_loans,
         "9mother_loan": mother_loan or {},
         "10rc_number": rc_number or {},
-        "Score Date": scoreDate or {},
+        "Score Date": score_date or {},
         "rc_data": data_car or {},
         "cibil_data": data or {},
         "3credit_score": credit_score
