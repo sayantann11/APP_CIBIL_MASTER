@@ -9,11 +9,11 @@ from typing import List, Dict, Tuple
 BANK_RULES = {
     "HERO": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "PASS"), (700, 719, "PASS"),
+            (300, 599, "REJECT"), (600, 699, "PASS"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
         "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 5, "PASS"), (6, 14, "PASS"), (15, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"), (6, 14, "PASS"), (15, float('inf'), "PASS")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -94,11 +94,11 @@ BANK_RULES = {
     },
     "IDFC": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "PASS"), (700, 719, "PASS"),
+            (300, 599, "REJECT"), (600, 699, "PASS"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
         "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 6, "PASS"), (7, 10, "REJECT"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 6, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -138,7 +138,7 @@ BANK_RULES = {
             (31, 53, "PASS"), (54, 70, "PASS"), (71, float('inf'), "CHECK OTHER CONDITION")
         ],
         "loan_amount": [
-            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "REJECT")
+            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "PASS")
         ],
         "bounces_0_3_months": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 2, "REJECT"), (3, float('inf'), "REJECT")
@@ -180,11 +180,11 @@ BANK_RULES = {
 
     "TATA": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "REJECT"), (700, 719, "PASS"),
+            (300, 599, "REJECT"), (600, 699, "REJECT"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
         "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 5, "PASS"),(6,9,'PASS'), (10, 10, "REJECT"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"),(6,7,'PASS'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -266,11 +266,11 @@ BANK_RULES = {
 
       "BAJAJ": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "REJECT"), (700, 719, "REJECT"),
+            (300, 599, "REJECT"), (600, 699, "REJECT"), (700, 719, "REJECT"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
         "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 6, "PASS"),(7,7,'REJECT'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 6, "PASS"),(7,7,'PASS'), (8, 10, "PASS"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -351,11 +351,11 @@ BANK_RULES = {
     },
     "AXIS": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "PASS"), (700, 719, "PASS"),
+            (300, 599, "REJECT"), (600, 699, "PASS"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 5, "PASS"),(6,7,'PASS'), (6, 14, "PASS"), (15, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"),(6,7,'PASS'), (6, 14, "PASS"), (15, float('inf'), "PASS")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -437,11 +437,11 @@ BANK_RULES = {
     },
      "YES BANK": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "REJECT"), (700, 719, "PASS"),
+            (300, 599, "REJECT"), (600, 699, "REJECT"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 6, "PASS"),(7,7,'REJECT'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"),(6,7,'REJECT'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -523,7 +523,7 @@ BANK_RULES = {
     },
      "PIRAMAL": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "PASS"), (700, 719, "PASS"),
+            (300, 599, "REJECT"), (600, 699, "PASS"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
@@ -567,7 +567,7 @@ BANK_RULES = {
             (31, 53, "PASS"), (54, 70, "PASS"), (71, float('inf'), "CHECK OTHER CONDITION")
         ],
         "loan_amount": [
-            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "PASS")
+            (0, 100000, "PASS"), (100001, 500000, "REJECT"), (500001, float('inf'), "REJECT")
         ],
         "bounces_0_3_months": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 2, "PASS"), (3, float('inf'), "REJECT")
@@ -608,11 +608,11 @@ BANK_RULES = {
     },
      "HDFC": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "REJECT"), (700, 719, "PASS"),
+            (300, 599, "REJECT"), (600, 699, "REJECT"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 6, "PASS"),(7,7,'REJECT'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"),(6,7,'REJECT'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -693,11 +693,11 @@ BANK_RULES = {
     },
     "ICICI": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "REJECT"), (700, 719, "REJECT"),
+            (300, 599, "REJECT"), (600, 699, "REJECT"), (700, 719, "REJECT"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 6, "PASS"),(7,7,'REJECT'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"),(6,7,'REJECT'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -778,11 +778,11 @@ BANK_RULES = {
     },
     "POONAWALA": {
         "cibil_score": [
-            (300, 650, "REJECT"), (651, 699, "REJECT"), (700, 719, "PASS"),
+            (300, 599, "REJECT"), (600, 699, "REJECT"), (700, 719, "PASS"),
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 5, "PASS"),(6,10,'PASS'), (11, 11, "REJECT"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 5, "PASS"),(6,7,'PASS'), (8, 11, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "REJECT"), (11, float('inf'), "REJECT")
@@ -822,7 +822,7 @@ BANK_RULES = {
             (31, 53, "PASS"), (54, 70, "PASS"), (71, float('inf'), "CHECK OTHER CONDITION")
         ],
         "loan_amount": [
-            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "PASS")
+            (0, 100000, "PASS"), (100001, 500000, "PASS"), (500001, float('inf'), "REJECT")
         ],
         "bounces_0_3_months": [
             (0, 0, "PASS"), (1, 1, "PASS"), (2, 2, "PASS"), (3, float('inf'), "REJECT")
@@ -952,7 +952,7 @@ BANK_RULES = {
             (720, 724, "PASS"), (725, 749, "PASS"), (750, float('inf'), "PASS")
         ],
        "cibil_enquiry_count": [
-            (0, 0, "PASS"), (1, 6, "PASS"),(7,7,'REJECT'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
+            (0, 0, "PASS"), (1, 6, "PASS"),(7,7,'PASS'), (8, 10, "REJECT"), (11, float('inf'), "REJECT")
         ],
         "dpd_1_30": [
             (0, 0, "PASS"), (1, 5, "PASS"), (6, 10, "PASS"), (11, float('inf'), "PASS")
@@ -1303,10 +1303,10 @@ def get_dpd_eligible_accounts(data):
 
 
 def count_custom_dpd_buckets(data):
-    print("SAYANTAN")
     today = datetime.today()
     start_date = (today.replace(day=1) - relativedelta(months=12))
     end_date = today
+
 
     dpd_counts = {
         "dpd_1_30": 0,
@@ -1323,7 +1323,12 @@ def count_custom_dpd_buckets(data):
 
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
-
+        ownership_indicator = account.get("ownershipIndicator", "").strip()
+        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
+        if ownership_indicator in ["3", "4"]:
+            continue
+        print(ownership_indicator)
+        
         # Consider only loan-type accounts (adjust as needed)
         # Consider only loan-type accounts (adjust as needed)
         if "loan" not in account_type or "gold loan" in account_type:
@@ -1407,7 +1412,11 @@ def count_bounces_by_period(data, current_date=None, exclude_account_number=None
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
         account_number = account.get("accountNumber")
+        ownership_indicator = account.get("ownershipIndicator", "").strip()
 
+        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
+        if ownership_indicator in ["3", "4"]:
+            continue
         if "loan" not in account_type:
             continue  # Filter only loan accounts
 
@@ -1678,6 +1687,45 @@ def evaluate_loan_eligibility(bank_name, cibil_score, enquiry_count, dpd_1_30, d
     else:
         return "Eligible for Loan"
 
+from typing import List, Dict
+
+from typing import List, Dict
+
+def get_active_motherloans(data: dict) -> List[Dict[str, str]]:
+    """
+    Extracts active 'mother loans' based on flexible keywords in account type.
+
+    Args:
+        data (dict): CIBIL data.
+
+    Returns:
+        list of dict: Details of active mother loans.
+    """
+    mother_loan_keywords = ["auto", "used car"]
+
+    accounts = data.get("data", {}).get("credit_report", [])[0].get("accounts", [])
+    active_mother_loans = []
+
+    for account in accounts:
+        account_type = account.get("accountType", "").lower()
+        # ✅ Check if it's a mother loan using any of the flexible keywords
+       
+        if any(keyword in account_type for keyword in mother_loan_keywords):
+                active_mother_loans.append({
+                    "accountNumber": account.get("accountNumber", ""),
+                    "accountType": account.get("accountType", ""),
+                    "memberShortName": account.get("memberShortName", ""),
+                    "currentBalance": account.get("currentBalance", ""),
+                    "amountOverdue": account.get("amountOverdue", ""),
+                    "emiAmount": account.get("emiAmount", ""),
+                    "highCreditAmount": account.get("highCreditAmount", ""),
+                    "dateOpened": account.get("dateOpened", ""),
+                    "lastPaymentDate": account.get("lastPaymentDate", ""),
+                    "dateReported": account.get("dateReported", "")
+                })
+
+    return active_mother_loans
+
 
 
 
@@ -1725,6 +1773,11 @@ def count_settlements_by_age(data):
 
     for account in accounts:
         account_type = account.get("accountType", "").lower()
+        ownership_indicator = account.get("ownershipIndicator", "").strip()
+
+        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
+        if ownership_indicator in ["3", "4"]:
+            continue
         if "credit card" in account_type:
             continue  # 🚫 Skip credit card accounts
         try:
@@ -1770,7 +1823,12 @@ def analyze():
     )
     
     active_loans = get_active_loan_banks(data)
-    print(f"Found {len(active_loans)} active loans (non-credit-card)")
+    display_active_mother_loan = get_active_motherloans(data)
+    
+    print(display_active_mother_loan)
+    for loan in display_active_mother_loan:
+        print(loan)
+
 
     name = get_field("data.name",data)
     credit_score = get_field("data.credit_score",data)
@@ -1989,7 +2047,7 @@ def analyze():
     # Safely pass the data to the template
     Date_value = fetch_car_timestamp()
     print("Timestamp:", Date_value)
-    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name,credit_score=credit_score,rc_number=rc_number,score_date=score_date)
+    return render_template('analyze.html', result=eligibility_result, rc_data=data_car or {}, cibil_data=data or {},accepted_banks=accepted_banks,rejected_banks=rejected_banks,mother_loan=mother_loan or {},bounce_summary=bounce_summary or {},pan_number=pan_number,name=name,active_loans=active_loans,owner_name=owner_name,financer_name=financer_name,credit_score=credit_score,rc_number=rc_number,score_date=score_date,display_active_mother_loan=display_active_mother_loan)
 
 
 
@@ -2028,7 +2086,10 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         .get('scoreDate')
     )
     active_loans = get_active_loan_banks(data)
-    print(f"Found {len(active_loans)} active loans (non-credit-card)")
+    display_active_mother_loan = get_active_motherloans(data)
+    
+    for loan in display_active_mother_loan:
+        print(loan)
     name = get_field("data.name",data)
     credit_score = get_field("data.credit_score",data)
     print("name :",name)
@@ -2258,6 +2319,7 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         "6active_loans": active_loans,
         "9mother_loan": mother_loan or {},
         "10rc_number": rc_number or {},
+        "11ActiveLoan_could_be_mother_loan_":display_active_mother_loan or {},
         "Score Date": score_date or {},
         "rc_data": data_car or {},
         "cibil_data": data or {},
