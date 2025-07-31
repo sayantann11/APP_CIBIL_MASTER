@@ -1317,7 +1317,7 @@ def count_custom_dpd_buckets(data):
     }
 
     allowed_loans = [
-        "Auto Loan (Personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
+        "auto loan (personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
         "home loan", "loan against property", "commercial vehicle loan"
     ]
 
@@ -1410,7 +1410,7 @@ def count_bounces_by_period(data, current_date=None, exclude_account_number=None
         "bounces_0_12_months": 0
     }
     allowed_loans = [
-        "auuto loan (personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
+        "auto loan (personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
         "home loan", "loan against property", "commercial vehicle loan"
     ]
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
