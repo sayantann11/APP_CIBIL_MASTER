@@ -1317,7 +1317,7 @@ def count_custom_dpd_buckets(data):
     }
 
     allowed_loans = [
-        "auto loan", "two-wheeler loan", "personal loan", "business loan",
+        "Auto Loan (Personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
         "home loan", "loan against property", "commercial vehicle loan"
     ]
 
@@ -1331,7 +1331,8 @@ def count_custom_dpd_buckets(data):
         
         # Consider only loan-type accounts (adjust as needed)
         # Consider only loan-type accounts (adjust as needed)
-        if "loan" not in account_type or "gold loan" in account_type:
+        # ✅ Skip if account_type is not one of the allowed loans
+        if not any(allowed in account_type for allowed in allowed_loans):
             continue
         for record in account.get("monthlyPayStatus", []):
             date_str = record.get("date")
@@ -1408,7 +1409,10 @@ def count_bounces_by_period(data, current_date=None, exclude_account_number=None
         "bounces_0_6_months": 0,
         "bounces_0_12_months": 0
     }
-
+    allowed_loans = [
+        "auuto loan (personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
+        "home loan", "loan against property", "commercial vehicle loan"
+    ]
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
         account_number = account.get("accountNumber")
@@ -1417,9 +1421,9 @@ def count_bounces_by_period(data, current_date=None, exclude_account_number=None
         # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
         if ownership_indicator in ["3", "4"]:
             continue
-        if "loan" not in account_type:
-            continue  # Filter only loan accounts
-
+        
+        if not any(allowed in account_type for allowed in allowed_loans):
+            continue
         # Skip the mother loan account
         if exclude_account_number and account_number == exclude_account_number:
             continue
@@ -1720,6 +1724,7 @@ def get_active_motherloans(data: dict) -> List[Dict[str, str]]:
                     "emiAmount": account.get("emiAmount", ""),
                     "highCreditAmount": account.get("highCreditAmount", ""),
                     "dateOpened": account.get("dateOpened", ""),
+                    "dateClosed": account.get("dateClosed",""),
                     "lastPaymentDate": account.get("lastPaymentDate", ""),
                     "dateReported": account.get("dateReported", "")
                 })
