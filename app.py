@@ -5,6 +5,7 @@ import json
 from datetime import datetime , timedelta
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Tuple
+from function import get_value_phase2
 
 BANK_RULES = {
     "HERO": {
@@ -1314,7 +1315,7 @@ def count_custom_dpd_buckets(data):
         "dpd_45_above": 0,
     }
     allowed_loans = [
-        "auto loan (personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
+        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan",
         "home loan", "loan against property", "commercial vehicle loan"
     ]
 
@@ -1367,7 +1368,7 @@ def count_custom_dpd_buckets(data):
 
             if dpd_days >= 45:
                 dpd_counts["dpd_45_above"] += 1
-    print("SAYANTAN")
+    
     return dpd_counts
 
 def loan_dpd_helper(data):
@@ -1375,7 +1376,7 @@ def loan_dpd_helper(data):
     start_date = (today.replace(day=1) - relativedelta(months=12))
     end_date = today
     allowed_loans = [
-        "Auto Loan (Personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
+        "Auto Loan (Personal)","auto loan", "two wheeler loan", "personal loan", "business loan",
         "home loan", "loan against property", "commercial vehicle loan"
     ]
     matched_accounts = []
@@ -1454,7 +1455,7 @@ def count_bounces_by_period(data, current_date=None, exclude_account_number=None
         "bounces_0_12_months": 0
     }
     allowed_loans = [
-        "auto loan (personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
+        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan",
         "home loan", "loan against property", "commercial vehicle loan"
     ]
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
@@ -2750,11 +2751,6 @@ def motheroutput():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-    
-
-
-
-
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_api():
@@ -2772,6 +2768,22 @@ def analyze_api():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+
+@app.route('/api/get_phase2', methods=['POST'])
+def get_phase2():
+    payload = request.json
+    pan_number = payload.get('pan_number')
+    vehicle_number = payload.get('vehicle_number')
+
+    if not pan_number or not vehicle_number:
+        return jsonify({"error": "Missing PAN or Vehicle Number"}), 400
+
+    try:
+        result = get_value_phase2(pan_number, vehicle_number)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
