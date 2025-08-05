@@ -5,7 +5,7 @@ import json
 from datetime import datetime , timedelta
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Tuple
-from function import get_value_phase2
+#from function import get_value_phase2
 
 BANK_RULES = {
     "HERO": {
@@ -2769,7 +2769,7 @@ def analyze_api():
         return jsonify({"error": str(e)}), 500
 
 
-
+'''
 @app.route('/api/get_phase2', methods=['POST'])
 def get_phase2():
     payload = request.json
@@ -2784,6 +2784,6 @@ def get_phase2():
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+'''
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
