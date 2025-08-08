@@ -1315,8 +1315,8 @@ def count_custom_dpd_buckets(data):
         "dpd_45_above": 0,
     }
     allowed_loans = [
-        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan",
-        "home loan", "loan against property", "commercial vehicle loan"
+        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan","business loan – general","business loan – priority sector – small business","business loan – priority sector – agriculture","business loan – priority sector – others","business loan - unsecured"
+        "housing loan", "property loan", "commercial vehicle loan","microfinance – business Loan","microfinance – personal loan","microfinance – housing loan","business loan - secured"
     ]
 
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
@@ -1376,8 +1376,8 @@ def loan_dpd_helper(data):
     start_date = (today.replace(day=1) - relativedelta(months=12))
     end_date = today
     allowed_loans = [
-        "Auto Loan (Personal)","auto loan", "two wheeler loan", "personal loan", "business loan",
-        "home loan", "loan against property", "commercial vehicle loan"
+        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan","business loan – general","business loan – priority sector – small business","business loan – priority sector – agriculture","business loan – priority sector – others","business loan - unsecured"
+        "housing loan", "property loan", "commercial vehicle loan","microfinance – business Loan","microfinance – personal loan","microfinance – housing loan","business loan - secured"
     ]
     matched_accounts = []
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
@@ -1455,8 +1455,8 @@ def count_bounces_by_period(data, current_date=None, exclude_account_number=None
         "bounces_0_12_months": 0
     }
     allowed_loans = [
-        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan",
-        "home loan", "loan against property", "commercial vehicle loan"
+        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan","business loan – general","business loan – priority sector – small business","business loan – priority sector – agriculture","business loan – priority sector – others","business loan - unsecured"
+        "housing loan", "property loan", "commercial vehicle loan","microfinance – business Loan","microfinance – personal loan","microfinance – housing loan","business loan - secured"
     ]
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
@@ -2367,12 +2367,11 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         "1name": name,
         "4owner_name": owner_name,
         "5financer_name": financer_name,
-        "6active_loans": active_loans,
         "9mother_loan": mother_loan or {},
         "10rc_number": rc_number or {},
         "11-Mother_loan_or_topup_loan":display_active_mother_loan or {},
         "12DPDsummary":dpd_summary or {},
-        "loans_for_dpd":loan_for_dpd or {},
+        "6loans_for_dpd":loan_for_dpd or {},
         "Score Date": score_date or {},
         "rc_data": data_car or {},
         "cibil_data": data or {},
