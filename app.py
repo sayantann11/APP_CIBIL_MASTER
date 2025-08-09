@@ -1321,9 +1321,10 @@ def count_custom_dpd_buckets(data):
 
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
-        ownership_indicator = account.get("ownershipIndicator", "").strip()
-        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
-        if ownership_indicator in ["3", "4"]:
+        ownership_indicator = str(account.get("ownershipIndicator", "")).strip().lower()
+
+        # 🚫 Skip if numeric 3/4 or text form 'guarantor'/'authorized user'
+        if ownership_indicator in ["3", "4", "guarantor", "authorized user"]:
             continue
         
         
@@ -1382,9 +1383,10 @@ def loan_dpd_helper(data):
     matched_accounts = []
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
-        ownership_indicator = account.get("ownershipIndicator", "").strip()
-        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
-        if ownership_indicator in ["3", "4"]:
+        ownership_indicator = str(account.get("ownershipIndicator", "")).strip().lower()
+
+        # 🚫 Skip if numeric 3/4 or text form 'guarantor'/'authorized user'
+        if ownership_indicator in ["3", "4", "guarantor", "authorized user"]:
             continue
         
         
@@ -1407,12 +1409,13 @@ def loan_dpd_helper(data):
                continue
            if dpd_days <= 0:
                continue
-        
-    # Store only account number and type
-        matched_accounts.append({
+           matched_accounts.append({
             "accountNumber": account.get("accountNumber", ""),
             "accountType": account.get("accountType", "")
-        })
+            })
+        
+    # Store only account number and type
+        
 
     return matched_accounts
 
@@ -1461,10 +1464,10 @@ def count_bounces_by_period(data, current_date=None, exclude_account_number=None
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
         account_number = account.get("accountNumber")
-        ownership_indicator = account.get("ownershipIndicator", "").strip()
+        ownership_indicator = str(account.get("ownershipIndicator", "")).strip().lower()
 
-        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
-        if ownership_indicator in ["3", "4"]:
+        # 🚫 Skip if numeric 3/4 or text form 'guarantor'/'authorized user'
+        if ownership_indicator in ["3", "4", "guarantor", "authorized user"]:
             continue
         
         if not any(allowed in account_type for allowed in allowed_loans):
@@ -1569,7 +1572,6 @@ def find_mother_auto_loan(data, data_car):
         loan_financer = account.get("memberShortName", "")
 
         if not date_opened or ("auto" not in account_type and "used" not in account_type):
-            print(account_type)
             continue
 
         try:
@@ -1823,16 +1825,16 @@ def count_settlements_by_age(data):
 
     for account in accounts:
         account_type = account.get("accountType", "").lower()
-        ownership_indicator = account.get("ownershipIndicator", "").strip()
+        ownership_indicator = str(account.get("ownershipIndicator", "")).strip().lower()
 
-        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
-        if ownership_indicator in ["3", "4"]:
+        # 🚫 Skip if numeric 3/4 or text form 'guarantor'/'authorized user'
+        if ownership_indicator in ["3", "4", "guarantor", "authorized user"]:
             continue
         if "credit card" in account_type:
             continue  # 🚫 Skip credit card accounts
         try:
             wo_amount_total = float(account.get("woAmountTotal", -1))
-            if wo_amount_total > 0:
+            if wo_amount_total > 50000:
                 date_reported_str = account.get("dateReported", "")
                 if date_reported_str and date_reported_str.lower() != "na":
                     date_reported = datetime.strptime(date_reported_str, "%Y-%m-%d")
@@ -1978,6 +1980,7 @@ def analyze():
     # Example usage
     dpd_summary = count_custom_dpd_buckets(data)
     loan_for_dpd = loan_dpd_helper(data)
+    print("hello hello hello",loan_for_dpd)
     print("=================================")
     mother_loan = find_mother_auto_loan(data, data_car)
     print(mother_loan)
@@ -2001,7 +2004,6 @@ def analyze():
     print(f"Car Age in months: {total_months}")
     print(f"Car Owner Age (based on CIBIL birthDate): {year_diff} years")
     print("Custom DPD Summary in Last 12 Months:", dpd_summary)
-    print(loan_for_dpd)
     print("Bounce Summary:")
     print(bounces)
     print("dpd 1-30",dpd_1_30_count)
