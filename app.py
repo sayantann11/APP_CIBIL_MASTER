@@ -1390,7 +1390,7 @@ def loan_dpd_helper(data):
             continue
         
         
-        print(account.get("ownershipIndicator", ""))
+        
         # Consider only loan-type accounts (adjust as needed)
         # Consider only loan-type accounts (adjust as needed)
         # ✅ Skip if account_type is not one of the allowed loans
@@ -1844,7 +1844,6 @@ def count_settlements_by_age(data):
                     if date_reported >= recent_cutoff:
                         recent_settlements += 1
                     else:
-                        print(account)
                         old_settlements += 1
         except (TypeError, ValueError):
             continue
@@ -2247,7 +2246,7 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
     loan_for_dpd = loan_dpd_helper(data)
     loan_for_dpd = [dict(t) for t in {tuple(d.items()) for d in loan_for_dpd}]
 
-    
+
     mother_loan = find_mother_auto_loan(data, data_car)
     
    
