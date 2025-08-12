@@ -5,6 +5,7 @@ import json
 from datetime import datetime , timedelta
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict, Tuple
+#from function import get_value_phase2
 
 BANK_RULES = {
     "HERO": {
@@ -1314,15 +1315,16 @@ def count_custom_dpd_buckets(data):
         "dpd_45_above": 0,
     }
     allowed_loans = [
-        "auto loan (personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
-        "home loan", "loan against property", "commercial vehicle loan"
+        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan","business loan – general","business loan – priority sector – small business","business loan – priority sector – agriculture","business loan – priority sector – others","business loan - unsecured"
+        "housing loan", "property loan", "commercial vehicle loan","microfinance – business Loan","microfinance – personal loan","microfinance – housing loan","business loan - secured"
     ]
 
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
-        ownership_indicator = account.get("ownershipIndicator", "").strip()
-        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
-        if ownership_indicator in ["3", "4"]:
+        ownership_indicator = str(account.get("ownershipIndicator", "")).strip().lower()
+
+        # 🚫 Skip if numeric 3/4 or text form 'guarantor'/'authorized user'
+        if ownership_indicator in ["3", "4", "guarantor", "authorized user"]:
             continue
         
         
@@ -1367,7 +1369,7 @@ def count_custom_dpd_buckets(data):
 
             if dpd_days >= 45:
                 dpd_counts["dpd_45_above"] += 1
-    print("SAYANTAN")
+    
     return dpd_counts
 
 def loan_dpd_helper(data):
@@ -1375,16 +1377,18 @@ def loan_dpd_helper(data):
     start_date = (today.replace(day=1) - relativedelta(months=12))
     end_date = today
     allowed_loans = [
-        "Auto Loan (Personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
-        "home loan", "loan against property", "commercial vehicle loan"
+        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan","business loan – general","business loan – priority sector – small business","business loan – priority sector – agriculture","business loan – priority sector – others","business loan - unsecured"
+        "housing loan", "property loan", "commercial vehicle loan","microfinance – business Loan","microfinance – personal loan","microfinance – housing loan","business loan - secured"
     ]
     matched_accounts = []
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
-        ownership_indicator = account.get("ownershipIndicator", "").strip()
-        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
-        if ownership_indicator in ["3", "4"]:
+        ownership_indicator = str(account.get("ownershipIndicator", "")).strip().lower()
+
+        # 🚫 Skip if numeric 3/4 or text form 'guarantor'/'authorized user'
+        if ownership_indicator in ["3", "4", "guarantor", "authorized user"]:
             continue
+        
         
         
         # Consider only loan-type accounts (adjust as needed)
@@ -1406,12 +1410,14 @@ def loan_dpd_helper(data):
                continue
            if dpd_days <= 0:
                continue
+           matched_accounts.append({
+            "accountNumber": account.get("accountNumber", ""),
+            "accountType": account.get("accountType", ""),
+            "ownershipIndicator": account.get("ownershipIndicator","")
+            })
         
     # Store only account number and type
-        matched_accounts.append({
-            "accountNumber": account.get("accountNumber", ""),
-            "accountType": account.get("accountType", "")
-        })
+        
 
     return matched_accounts
 
@@ -1454,16 +1460,16 @@ def count_bounces_by_period(data, current_date=None, exclude_account_number=None
         "bounces_0_12_months": 0
     }
     allowed_loans = [
-        "auto loan (personal)","auto loan", "two-wheeler loan", "personal loan", "business loan",
-        "home loan", "loan against property", "commercial vehicle loan"
+        "auto loan (personal)","auto loan", "two wheeler loan", "personal loan", "business loan","business loan – general","business loan – priority sector – small business","business loan – priority sector – agriculture","business loan – priority sector – others","business loan - unsecured"
+        "housing loan", "property loan", "commercial vehicle loan","microfinance – business Loan","microfinance – personal loan","microfinance – housing loan","business loan - secured"
     ]
     for account in data.get("data", {}).get("credit_report", [])[0].get("accounts", []):
         account_type = account.get("accountType", "").lower()
         account_number = account.get("accountNumber")
-        ownership_indicator = account.get("ownershipIndicator", "").strip()
+        ownership_indicator = str(account.get("ownershipIndicator", "")).strip().lower()
 
-        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
-        if ownership_indicator in ["3", "4"]:
+        # 🚫 Skip if numeric 3/4 or text form 'guarantor'/'authorized user'
+        if ownership_indicator in ["3", "4", "guarantor", "authorized user"]:
             continue
         
         if not any(allowed in account_type for allowed in allowed_loans):
@@ -1568,7 +1574,6 @@ def find_mother_auto_loan(data, data_car):
         loan_financer = account.get("memberShortName", "")
 
         if not date_opened or ("auto" not in account_type and "used" not in account_type):
-            print(account_type)
             continue
 
         try:
@@ -1822,16 +1827,17 @@ def count_settlements_by_age(data):
 
     for account in accounts:
         account_type = account.get("accountType", "").lower()
-        ownership_indicator = account.get("ownershipIndicator", "").strip()
+        ownership_indicator = str(account.get("ownershipIndicator", "")).strip().lower()
 
-        # 🚫 Skip if ownership is 3 (Guarantor) or 4 (Authorized User)
-        if ownership_indicator in ["3", "4"]:
+        # 🚫 Skip if numeric 3/4 or text form 'guarantor'/'authorized user'
+        if ownership_indicator in ["3", "4", "guarantor", "authorized user"]:
             continue
         if "credit card" in account_type:
             continue  # 🚫 Skip credit card accounts
         try:
+            
             wo_amount_total = float(account.get("woAmountTotal", -1))
-            if wo_amount_total > 0:
+            if wo_amount_total > 50000:
                 date_reported_str = account.get("dateReported", "")
                 if date_reported_str and date_reported_str.lower() != "na":
                     date_reported = datetime.strptime(date_reported_str, "%Y-%m-%d")
@@ -1977,6 +1983,7 @@ def analyze():
     # Example usage
     dpd_summary = count_custom_dpd_buckets(data)
     loan_for_dpd = loan_dpd_helper(data)
+    print("hello hello hello",loan_for_dpd)
     print("=================================")
     mother_loan = find_mother_auto_loan(data, data_car)
     print(mother_loan)
@@ -2000,7 +2007,6 @@ def analyze():
     print(f"Car Age in months: {total_months}")
     print(f"Car Owner Age (based on CIBIL birthDate): {year_diff} years")
     print("Custom DPD Summary in Last 12 Months:", dpd_summary)
-    print(loan_for_dpd)
     print("Bounce Summary:")
     print(bounces)
     print("dpd 1-30",dpd_1_30_count)
@@ -2238,7 +2244,9 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
     # Example usage
     dpd_summary = count_custom_dpd_buckets(data)
     loan_for_dpd = loan_dpd_helper(data)
-    
+    loan_for_dpd = [dict(t) for t in {tuple(d.items()) for d in loan_for_dpd}]
+
+
     mother_loan = find_mother_auto_loan(data, data_car)
     
    
@@ -2366,12 +2374,11 @@ def process_eligibility(pan_number, vehicle_data,reg_date=None):
         "1name": name,
         "4owner_name": owner_name,
         "5financer_name": financer_name,
-        "6active_loans": active_loans,
         "9mother_loan": mother_loan or {},
         "10rc_number": rc_number or {},
-        "11ActiveLoan_could_be_mother_loan_":display_active_mother_loan or {},
+        "11-Mother_loan_or_topup_loan":display_active_mother_loan or {},
         "12DPDsummary":dpd_summary or {},
-        "loans_for_dpd":loans_for_dpd or {},
+        "6loans_for_dpd":loan_for_dpd or {},
         "Score Date": score_date or {},
         "rc_data": data_car or {},
         "cibil_data": data or {},
@@ -2750,11 +2757,6 @@ def motheroutput():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-    
-
-
-
-
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_api():
@@ -2773,5 +2775,21 @@ def analyze_api():
         return jsonify({"error": str(e)}), 500
 
 
+'''
+@app.route('/api/get_phase2', methods=['POST'])
+def get_phase2():
+    payload = request.json
+    pan_number = payload.get('pan_number')
+    vehicle_number = payload.get('vehicle_number')
+
+    if not pan_number or not vehicle_number:
+        return jsonify({"error": "Missing PAN or Vehicle Number"}), 400
+
+    try:
+        result = get_value_phase2(pan_number, vehicle_number)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+'''
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
